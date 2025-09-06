@@ -6,6 +6,7 @@ LexisNexis Risk Solutions (LNRS)'s "Tech for Good" AI Charity Validation project
 
 Relevant Charity Site fields are a subset of the GraphQL `siteInput` type:
 ```gql
+input siteInput {
   acceptsFoodDonations: YesNoEnum
   accessInfoText: String
   addressLine2: String
@@ -54,6 +55,7 @@ Relevant Charity Site fields are a subset of the GraphQL `siteInput` type:
   streetAddress: String!
   website: String
   zip: String!
+}
 ```
 
 ## Potential Projects / Target Goals / Deliverables 
