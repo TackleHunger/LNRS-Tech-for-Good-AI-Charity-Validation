@@ -109,9 +109,9 @@ type SiteForAI {
   lastUserModifiedAt: Date # when a Charity Representative last modified this site
   staffConfirmedAt: Date # when a Tackle Hunger Staff member last confirmed this site is valid
   #
-  # Human-Readable Partner/Service/Run Identifiers if AI/API/ETL Operation, AI Programs Must Push These
-  createdMethod: String # required when AI/API/ETL-created, consistent per partner/service/run
-  modifiedBy: String # required when AI/API/ETL-modified, consistent per partner/service/run
+  # Human-Readable Partner/Service/Run Identifiers if AI/API/ETL Operation, consistent per partner/service/run
+  createdMethod: String # required when AI/API/ETL-created, AI Programs Must Push This When Creating
+  modifiedBy: String # required when AI/API/ETL-modified, AI Programs Must Push This When Updating
   #
   dataSource: String # URI or human-readable identifier if found on foreign source list/table/DB with IDs
   dataSourceId: ID # id from the foreign source (if from one with IDs)
@@ -139,7 +139,7 @@ type OrganizationForAI {
   ### LOCATION DETAILS
   #
   # Parent Organization Mailing Address, PO box is fine, public but not shown on the Map
-  name: String
+  name: String # Charity's Registered Name
   streetAddress: String
   addressLine2: String
   city: String
@@ -190,11 +190,6 @@ Here they are ordered for clarity & explained:
 
 ```gql
 input siteInputForAI {
-  ### CORE (IDs & Important Direct Joined Relations)
-  #
-  organizationId: ID # string, foreign key, only modify if grouping this Site w/ others on a different Organization
-  ###
-
   ### LOCATION DETAILS (Food Pickup/Dropoff/Distribution Address, avoid PO Boxes)
   #
   # Any of these 4 changed triggers internal Location-Standardizing w/ Google Maps Geocode & Place Details APIs
@@ -260,13 +255,12 @@ input siteInputForAI {
 
   ### BACKEND FIELDS (system provenance & workflow)
   #
+  organizationId: ID # string, foreign key, only set if grouping this Site w/ others on a preexisting Organization
   pendingStatus: PendingStatus # approval workflow state, see scalar options
-  lastUserModifiedAt: Date # when a Charity Representative last modified this site
-  staffConfirmedAt: Date # when a Tackle Hunger Staff member last confirmed this site is valid
   #
-  # Human-Readable Partner/Service/Run Identifiers if AI/API/ETL Operation, AI Programs Must Push These
-  createdMethod: String! # required when AI/API/ETL-created, consistent per partner/service/run
-  modifiedBy: String # required when AI/API/ETL-modified, consistent per partner/service/run
+  # Human-Readable Partner/Service/Run Identifiers if AI/API/ETL Operation, consistent per partner/service/run
+  createdMethod: String! # required when AI/API/ETL-created, AI Programs Must Push This
+  modifiedBy: String # required when AI/API/ETL-modified
   #
   dataSource: String # URI or human-readable identifier if found on foreign source list/table/DB with IDs
   dataSourceId: ID # id from the foreign source (if from one with IDs)
@@ -288,11 +282,6 @@ Here they are ordered for clarity & explained:
 
 ```gql
 input siteInputForAIUpdate {
-  ### CORE (IDs & Important Direct Joined Relations)
-  #
-  organizationId: ID # string, foreign key, only modify if grouping this Site w/ others on a different Organization
-  ###
-
   ### LOCATION DETAILS (Food Pickup/Dropoff/Distribution Address, avoid PO Boxes)
   #
   # Any of these 4 changed triggers internal Location-Standardizing w/ Google Maps Geocode & Place Details APIs
@@ -358,13 +347,11 @@ input siteInputForAIUpdate {
 
   ### BACKEND FIELDS (system provenance & workflow)
   #
+  organizationId: ID # string, foreign key, only modify if grouping this Site w/ others on a different Organization
   pendingStatus: PendingStatus # approval workflow state, see scalar options
-  lastUserModifiedAt: Date # when a Charity Representative last modified this site
-  staffConfirmedAt: Date # when a Tackle Hunger Staff member last confirmed this site is valid
   #
-  # Human-Readable Partner/Service/Run Identifiers if AI/API/ETL Operation, AI Programs Must Push These
-  createdMethod: String # required when AI/API/ETL-created, consistent per partner/service/run
-  modifiedBy: String! # required when AI/API/ETL-modified, consistent per partner/service/run
+  # Human-Readable Partner/Service/Run Identifiers if AI/API/ETL Operation, consistent per partner/service/run
+  modifiedBy: String! # required when AI/API/ETL-modified, AI Programs Must Push This
   #
   dataSource: String # URI or human-readable identifier if found on foreign source list/table/DB with IDs
   dataSourceId: ID # id from the foreign source (if from one with IDs)
@@ -395,12 +382,12 @@ input organizationInputUpdate {
   ### LOCATION DETAILS
   #
   # Parent Organization Mailing Address, PO box is fine, public but not shown on the Map
-  name: String!
-  streetAddress: String!
+  name: String! # Charity's Registered Name, required when updating (can't be blank)
+  streetAddress: String
   addressLine2: String
-  city: String!
-  state: String!
-  zip: String!
+  city: String
+  state: String
+  zip: String
   ###
 
   ### CONTACT DETAILS
@@ -431,7 +418,7 @@ input organizationInputUpdate {
 - Common to each:
 
   - store mailing address separately if it differs from the food pickup/dropoff address
-    - _a non-food-service address like a PO box goes on the related Organization, as opposed to the Site (see schemas_)
+    - _a non-food-service address like a PO box goes on the related Organization, as opposed to the Site (see schemas)_
   - ensure they're open year-round (as opposed to seasonal, like school or summer programs)
   - potentially have the AI give a data-reliability score for each result
     - i.e. higher if verified from multiple sources, favored sources, conforms to key phrases
@@ -441,9 +428,9 @@ input organizationInputUpdate {
 
 1. Find Info that our Current Charities are Missing & Verify their Operational Status
 
-   - _blank, missing, or really poor quality field values_
+   - i.e. blank, missing, or really poor quality field values
    - push fields that were previously empty to our API (_`mutation updateSiteFromAI`_) - if you think they're good enough we can save them immediately
-   - store a copy of our original data & the new recommended data at that moment in time, as well as links to our original Site/Org & to the new source
+   - store a copy of our original data & the new recommended data at that moment in time, as well as links to our Site/Org & to the new source
      - _in a new storage bucket or DB for this project_
 
 2. Scrape Facebook for Charities  (_added to any of these other projects_)
@@ -463,6 +450,6 @@ input organizationInputUpdate {
 
 4. Re-check our Current Charities to Find Newer Data & Flag ones that might have changed
 
-   - store the links to our original & the new source as well as our original data & the new data at that moment in time
+   - store a copy of our original data & the new recommended data at that moment in time, as well as links to our Site/Org & to the new source
      - _in a new storage bucket or DB for this project_
    - potentially, if the AI gives a data-reliability score, push very good ones to our API to immediately go live (_`mutation updateSiteFromAI`_)
