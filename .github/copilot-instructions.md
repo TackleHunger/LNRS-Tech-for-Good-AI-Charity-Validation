@@ -2,31 +2,15 @@
 
 ## Repository Summary
 
-This is a **documentation-only repository** for LexisNexis Risk Solutions (LNRS)'s "Tech for Good" Tackle Hunger AI Charity Validation project. The repository contains comprehensive GraphQL API specifications and field definitions for charity data validation and management systems.
+This is a repository for LexisNexis Risk Solutions (LNRS)'s "Tech for Good" Tackle Hunger AI Charity Validation project. The repository contains comprehensive GraphQL API specifications and field definitions for charity data validation and management systems.
 
 **Key Facts:**
 - **Type:** Documentation/Specification repository
 - **Size:** Small (~23KB README.md + .gitignore)
 - **Languages:** GraphQL schema definitions in Markdown
 - **Framework:** GraphQL API specification
-- **No code, build system, or tests** - purely documentation
 
 ## Build Instructions
-
-⚠️ **IMPORTANT: This is a documentation-only repository with NO build system, tests, or executable code.**
-
-### What Works
-- **Documentation editing:** All changes are made directly to Markdown files
-- **Git operations:** Standard git commands work normally
-- **File validation:** Use standard Markdown linters if available in your environment
-
-### What Doesn't Exist
-- No `package.json`, `build`, `test`, or `lint` scripts
-- No dependencies to install (`npm install`, `pip install`, etc.)
-- No compilation or build steps required
-- No test suites to run
-- No continuous integration workflows
-- No runtime environment or servers to start
 
 ### Validation Steps
 1. **Markdown syntax:** Ensure proper Markdown formatting
@@ -88,7 +72,6 @@ This is a **documentation-only repository** for LexisNexis Risk Solutions (LNRS)
 - **No other config files:** No linting, build, or framework configuration
 
 ### Dependencies and Validation
-- **No explicit dependencies** beyond GraphQL API endpoint
 - **Validation occurs server-side** when data is pushed to the API
 - **Google Maps integration** for location standardization (server-side)
 - **Feeding America network** integration for charity verification
@@ -125,5 +108,3 @@ This is a **documentation-only repository** for LexisNexis Risk Solutions (LNRS)
 - Modifying validation requirements or character limits
 - Updating implementation examples and best practices
 - Adding new project goals or deliverables
-
-**Trust these instructions:** This repository contains only documentation. Do not search for build scripts, test files, or executable code - they do not exist. Focus on improving documentation clarity, accuracy, and completeness.
