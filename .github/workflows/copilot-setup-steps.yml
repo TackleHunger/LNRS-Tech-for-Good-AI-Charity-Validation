@@ -1,0 +1,814 @@
+name: GitHub Copilot Development Environment Setup
+
+on:
+  workflow_dispatch:
+    inputs:
+      setup_type:
+        description: 'Type of setup to perform'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - dependencies-only
+        - firewall-config
+
+env:
+  PYTHON_VERSION: '3.13'
+
+jobs:
+  setup-copilot-environment:
+    runs-on: ubuntu-latest
+    environment: copilot
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+        
+    - name: Upgrade pip and install build tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install wheel setuptools
+        
+    - name: Create requirements.txt for Tackle Hunger project
+      run: |
+        cat > requirements.txt << 'EOF'
+        # Core HTTP and GraphQL client libraries
+        requests>=2.31.0
+        httpx>=0.25.0
+        graphql-core>=3.2.0
+        gql[requests]>=3.4.0
+        
+        # Data validation and parsing
+        pydantic>=2.4.0
+        pydantic[email]>=2.4.0
+        
+        # Environment and configuration management
+        python-dotenv>=1.0.0
+        pyyaml>=6.0.1
+        
+        # Date/time handling
+        python-dateutil>=2.8.2
+        
+        # Async support for API operations
+        aiohttp>=3.8.0
+        asyncio-throttle>=1.0.2
+        
+        # Data processing utilities
+        pandas>=2.1.0
+        numpy>=1.24.0
+        
+        # Logging and monitoring
+        structlog>=23.1.0
+        
+        # Testing frameworks
+        pytest>=7.4.0
+        pytest-asyncio>=0.21.0
+        pytest-mock>=3.11.0
+        
+        # Development utilities
+        black>=23.7.0
+        flake8>=6.0.0
+        mypy>=1.5.0
+        EOF
+        
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+        
+    - name: Create development environment configuration
+      run: |
+        cat > .env.example << 'EOF'
+        # Tackle Hunger API Configuration
+        # Copy this file to .env and fill in the actual values from GitHub secrets
+        
+        # GraphQL API Endpoints
+        STAGING_GRAPHQL_ENDPOINT=https://staging-api.tacklehunger.org/graphql
+        PRODUCTION_GRAPHQL_ENDPOINT=https://api.tacklehunger.org/graphql
+        
+        # API Authentication
+        API_KEY=your_api_key_here
+        API_SECRET=your_api_secret_here
+        
+        # Google Maps API (for address standardization)
+        GOOGLE_MAPS_API_KEY=your_google_maps_key_here
+        
+        # Environment Selection (staging|production)
+        ENVIRONMENT=staging
+        
+        # AI/ETL Operation Identifiers
+        CREATED_METHOD=AI_Copilot_Assistant
+        MODIFIED_BY=GitHub_Copilot_User
+        
+        # Rate limiting and timeout settings
+        API_RATE_LIMIT=10
+        API_TIMEOUT=30
+        
+        # Logging configuration
+        LOG_LEVEL=INFO
+        LOG_FORMAT=json
+        EOF
+        
+    - name: Create Python project structure
+      run: |
+        mkdir -p src/tackle_hunger
+        mkdir -p tests
+        mkdir -p scripts
+        mkdir -p docs
+        
+        # Create main package init
+        cat > src/tackle_hunger/__init__.py << 'EOF'
+        """
+        Tackle Hunger Charity Validation Package
+        
+        This package provides tools for validating and updating charity information
+        through the Tackle Hunger GraphQL API.
+        """
+        
+        __version__ = "1.0.0"
+        __author__ = "LNRS Tech for Good Volunteers"
+        EOF
+        
+        # Create GraphQL client module template
+        cat > src/tackle_hunger/graphql_client.py << 'EOF'
+        """
+        GraphQL Client for Tackle Hunger API
+        
+        Provides authenticated GraphQL operations for charity validation.
+        """
+        
+        import os
+        from typing import Optional, Dict, Any
+        import requests
+        from gql import gql, Client
+        from gql.transport.requests import RequestsHTTPTransport
+        from pydantic import BaseSettings
+        
+        
+        class TackleHungerConfig(BaseSettings):
+            """Configuration for Tackle Hunger API client."""
+            
+            api_key: str
+            api_secret: str
+            environment: str = "staging"
+            staging_endpoint: str = "https://staging-api.tacklehunger.org/graphql"
+            production_endpoint: str = "https://api.tacklehunger.org/graphql"
+            timeout: int = 30
+            rate_limit: int = 10
+            
+            class Config:
+                env_file = ".env"
+                
+            @property
+            def graphql_endpoint(self) -> str:
+                """Get the appropriate GraphQL endpoint based on environment."""
+                return (
+                    self.production_endpoint 
+                    if self.environment == "production" 
+                    else self.staging_endpoint
+                )
+        
+        
+        class TackleHungerClient:
+            """GraphQL client for Tackle Hunger charity validation operations."""
+            
+            def __init__(self, config: Optional[TackleHungerConfig] = None):
+                self.config = config or TackleHungerConfig()
+                self._client = self._create_client()
+                
+            def _create_client(self) -> Client:
+                """Create authenticated GraphQL client."""
+                transport = RequestsHTTPTransport(
+                    url=self.config.graphql_endpoint,
+                    headers={
+                        "Authorization": f"Bearer {self.config.api_key}",
+                        "X-API-Secret": self.config.api_secret,
+                    },
+                    timeout=self.config.timeout,
+                )
+                
+                return Client(transport=transport, fetch_schema_from_transport=True)
+                
+            def execute_query(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                """Execute a GraphQL query."""
+                gql_query = gql(query)
+                return self._client.execute(gql_query, variable_values=variables)
+        EOF
+        
+        # Create site operations module template
+        cat > src/tackle_hunger/site_operations.py << 'EOF'
+        """
+        Site operations for charity validation.
+        
+        Provides CRUD operations for charity sites through GraphQL.
+        """
+        
+        from typing import Dict, Any, List, Optional
+        from .graphql_client import TackleHungerClient
+        
+        
+        class SiteOperations:
+            """Operations for managing charity sites."""
+            
+            def __init__(self, client: TackleHungerClient):
+                self.client = client
+                
+            def get_sites_for_ai(self, limit: int = 50) -> List[Dict[str, Any]]:
+                """Fetch sites for AI processing."""
+                query = '''
+                query GetSitesForAI($limit: Int) {
+                    sitesForAI(limit: $limit) {
+                        id
+                        organizationId
+                        name
+                        streetAddress
+                        city
+                        state
+                        zip
+                        publicEmail
+                        publicPhone
+                        website
+                        description
+                        serviceArea
+                        acceptsFoodDonations
+                        status
+                        ein
+                    }
+                }
+                '''
+                
+                result = self.client.execute_query(query, {"limit": limit})
+                return result.get("sitesForAI", [])
+                
+            def create_site(self, site_data: Dict[str, Any]) -> Dict[str, Any]:
+                """Create a new charity site."""
+                mutation = '''
+                mutation AddCharityFromAI($input: siteInputForAI!) {
+                    addCharityFromAI(input: $input) {
+                        id
+                        name
+                        status
+                        pendingStatus
+                    }
+                }
+                '''
+                
+                return self.client.execute_query(mutation, {"input": site_data})
+                
+            def update_site(self, site_id: str, site_data: Dict[str, Any]) -> Dict[str, Any]:
+                """Update an existing charity site."""
+                mutation = '''
+                mutation UpdateSiteFromAI($siteId: String!, $input: siteInputForAIUpdate!) {
+                    updateSiteFromAI(siteId: $siteId, input: $input) {
+                        id
+                        name
+                        status
+                        pendingStatus
+                    }
+                }
+                '''
+                
+                return self.client.execute_query(
+                    mutation, 
+                    {"siteId": site_id, "input": site_data}
+                )
+        EOF
+        
+        # Create basic test file
+        cat > tests/test_graphql_client.py << 'EOF'
+        """
+        Tests for GraphQL client functionality.
+        """
+        
+        import pytest
+        from unittest.mock import Mock, patch
+        from src.tackle_hunger.graphql_client import TackleHungerConfig, TackleHungerClient
+        
+        
+        def test_config_defaults():
+            """Test configuration defaults."""
+            config = TackleHungerConfig(api_key="test", api_secret="test")
+            assert config.environment == "staging"
+            assert config.timeout == 30
+            assert config.rate_limit == 10
+            
+            
+        def test_staging_endpoint():
+            """Test staging endpoint selection."""
+            config = TackleHungerConfig(
+                api_key="test", 
+                api_secret="test", 
+                environment="staging"
+            )
+            assert "staging" in config.graphql_endpoint
+            
+            
+        def test_production_endpoint():
+            """Test production endpoint selection."""
+            config = TackleHungerConfig(
+                api_key="test", 
+                api_secret="test", 
+                environment="production"
+            )
+            assert "staging" not in config.graphql_endpoint
+        EOF
+        
+    - name: Create development scripts
+      run: |
+        # Create setup script for local development
+        cat > scripts/setup_dev_environment.py << 'EOF'
+        #!/usr/bin/env python3
+        """
+        Development environment setup script for Tackle Hunger volunteers.
+        
+        This script helps volunteers quickly set up their development environment
+        with proper configuration and validation.
+        """
+        
+        import os
+        import sys
+        import subprocess
+        from pathlib import Path
+        
+        
+        def check_python_version():
+            """Verify Python 3.13 is being used."""
+            if sys.version_info[:2] != (3, 13):
+                print(f"Warning: Expected Python 3.13, but found {sys.version}")
+                return False
+            print("✓ Python 3.13 detected")
+            return True
+            
+            
+        def install_dependencies():
+            """Install required dependencies."""
+            print("Installing Python dependencies...")
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+                print("✓ Dependencies installed successfully")
+                return True
+            except subprocess.CalledProcessError as e:
+                print(f"Error installing dependencies: {e}")
+                return False
+                
+                
+        def setup_environment_file():
+            """Set up environment configuration file."""
+            env_example = Path(".env.example")
+            env_file = Path(".env")
+            
+            if not env_file.exists() and env_example.exists():
+                env_file.write_text(env_example.read_text())
+                print("✓ Created .env file from template")
+                print("Please edit .env file with your actual API credentials")
+                return True
+            elif env_file.exists():
+                print("✓ .env file already exists")
+                return True
+            else:
+                print("Error: .env.example not found")
+                return False
+                
+                
+        def validate_environment():
+            """Validate that required environment variables are set."""
+            required_vars = [
+                "API_KEY",
+                "API_SECRET", 
+                "STAGING_GRAPHQL_ENDPOINT",
+                "GOOGLE_MAPS_API_KEY"
+            ]
+            
+            missing_vars = []
+            for var in required_vars:
+                if not os.getenv(var):
+                    missing_vars.append(var)
+                    
+            if missing_vars:
+                print(f"Warning: Missing environment variables: {', '.join(missing_vars)}")
+                print("Please update your .env file with the required values")
+                return False
+            
+            print("✓ All required environment variables are set")
+            return True
+            
+            
+        def main():
+            """Main setup function."""
+            print("Setting up Tackle Hunger development environment...")
+            print("=" * 50)
+            
+            success = True
+            success &= check_python_version()
+            success &= install_dependencies()
+            success &= setup_environment_file()
+            
+            # Load environment variables from .env file
+            try:
+                from dotenv import load_dotenv
+                load_dotenv()
+                success &= validate_environment()
+            except ImportError:
+                print("Note: python-dotenv not available for environment validation")
+            
+            print("=" * 50)
+            if success:
+                print("✓ Development environment setup complete!")
+                print("\nNext steps:")
+                print("1. Edit .env file with your actual API credentials")
+                print("2. Run tests: python -m pytest")
+                print("3. Start coding charity validation operations!")
+            else:
+                print("⚠ Setup completed with warnings. Please address the issues above.")
+                
+                
+        if __name__ == "__main__":
+            main()
+        EOF
+        
+        chmod +x scripts/setup_dev_environment.py
+        
+    - name: Generate firewall configuration documentation
+      run: |
+        cat > docs/firewall-setup.md << 'EOF'
+        # Firewall Configuration for GitHub Copilot Development
+
+        ## Required Network Access
+
+        To enable GitHub Copilot coding agents to work with the Tackle Hunger charity validation system, the following network endpoints must be accessible:
+
+        ### Core API Endpoints
+        
+        **Tackle Hunger GraphQL APIs:**
+        - `api.tacklehunger.org` (Production API)
+        - `staging-api.tacklehunger.org` (Staging API)
+        - Port: 443 (HTTPS)
+        - Protocol: HTTPS/GraphQL over POST
+
+        **Google Maps APIs (for address standardization):**
+        - `maps.googleapis.com` (Geocoding API)
+        - `places.googleapis.com` (Places API) 
+        - Port: 443 (HTTPS)
+        - Protocol: HTTPS/REST
+
+        ### GitHub and Development Services
+
+        **GitHub Services:**
+        - `github.com` (Repository access)
+        - `api.github.com` (GitHub API)
+        - `copilot-proxy.githubusercontent.com` (Copilot service)
+        - Port: 443 (HTTPS)
+
+        **Python Package Index:**
+        - `pypi.org` (Package downloads)
+        - `files.pythonhosted.org` (Package files)
+        - Port: 443 (HTTPS)
+
+        ## Firewall Rules Configuration
+
+        ### For Corporate/Enterprise Firewalls
+
+        **Allow Outbound HTTPS (port 443) to:**
+        ```bash
+        # Tackle Hunger APIs
+        *.tacklehunger.org
+        
+        # Google Maps APIs  
+        *.googleapis.com
+        
+        # GitHub Services
+        *.github.com
+        *.githubusercontent.com
+        
+        # Python Package Index
+        *.pypi.org
+        *.pythonhosted.org
+        ```
+
+        ### For Application-Level Firewall (if applicable)
+
+        **Python requests library configuration:**
+        ```python
+        # Add to your environment configuration if using proxy
+        import os
+        
+        # If behind corporate proxy
+        os.environ['HTTPS_PROXY'] = 'https://your-proxy:port'
+        os.environ['HTTP_PROXY'] = 'http://your-proxy:port'
+        
+        # SSL verification (if using internal certificates)
+        import ssl
+        import certifi
+        import requests
+        
+        # For custom certificate bundle
+        requests_session = requests.Session()
+        requests_session.verify = '/path/to/your/certificate/bundle.pem'
+        ```
+
+        ### Security Considerations
+
+        **Rate Limiting:**
+        - Implement rate limiting for API calls (default: 10 requests/second)
+        - Use exponential backoff for failed requests
+        - Monitor API usage to avoid quota exhaustion
+
+        **API Key Security:**
+        - Store API keys in GitHub environment secrets only
+        - Never commit API keys to source code
+        - Use environment-specific keys (staging vs production)
+        - Rotate keys regularly per security policy
+
+        **Data Privacy:**
+        - All charity data transmissions use HTTPS encryption
+        - API authentication uses Bearer token + secret
+        - No PII is logged in application logs
+        - Follow GDPR/privacy guidelines for charity contact information
+
+        ## Testing Connectivity
+
+        Use the provided connectivity test script:
+
+        ```bash
+        python scripts/test_connectivity.py
+        ```
+
+        This will verify access to all required endpoints and report any connectivity issues.
+
+        ## Troubleshooting
+
+        **Common Issues:**
+
+        1. **SSL Certificate Errors:**
+           - Update certificate bundle: `pip install --upgrade certifi`
+           - Check corporate certificate requirements
+
+        2. **Proxy Authentication:**
+           - Verify proxy credentials and configuration
+           - Test direct connection if proxy issues persist
+
+        3. **Rate Limiting:**
+           - Implement exponential backoff in API calls
+           - Monitor API usage and adjust request frequency
+
+        4. **DNS Resolution:**
+           - Verify DNS can resolve all required domains
+           - Check for internal DNS overrides or blocks
+
+        Contact your IT security team if you need help configuring these firewall rules.
+        EOF
+        
+    - name: Create connectivity test script
+      run: |
+        cat > scripts/test_connectivity.py << 'EOF'
+        #!/usr/bin/env python3
+        """
+        Connectivity test script for Tackle Hunger development environment.
+        
+        Tests network access to required APIs and services.
+        """
+        
+        import requests
+        import sys
+        from urllib.parse import urlparse
+        
+        
+        REQUIRED_ENDPOINTS = [
+            "https://api.tacklehunger.org/graphql",
+            "https://staging-api.tacklehunger.org/graphql", 
+            "https://maps.googleapis.com/maps/api/geocode/json",
+            "https://pypi.org/simple/requests/",
+            "https://github.com",
+            "https://api.github.com"
+        ]
+        
+        
+        def test_endpoint(url: str, timeout: int = 10) -> bool:
+            """Test connectivity to a single endpoint."""
+            try:
+                parsed = urlparse(url)
+                host = parsed.netloc
+                
+                print(f"Testing {host}...", end=" ")
+                
+                response = requests.get(url, timeout=timeout, allow_redirects=True)
+                
+                if response.status_code < 400:
+                    print("✓ OK")
+                    return True
+                else:
+                    print(f"⚠ HTTP {response.status_code}")
+                    return False
+                    
+            except requests.exceptions.Timeout:
+                print("⚠ Timeout")
+                return False
+            except requests.exceptions.ConnectionError:
+                print("✗ Connection Error")
+                return False
+            except Exception as e:
+                print(f"✗ Error: {e}")
+                return False
+                
+                
+        def main():
+            """Run connectivity tests."""
+            print("Testing connectivity to required endpoints...")
+            print("=" * 50)
+            
+            success_count = 0
+            total_count = len(REQUIRED_ENDPOINTS)
+            
+            for endpoint in REQUIRED_ENDPOINTS:
+                if test_endpoint(endpoint):
+                    success_count += 1
+                    
+            print("=" * 50)
+            print(f"Results: {success_count}/{total_count} endpoints accessible")
+            
+            if success_count == total_count:
+                print("✓ All connectivity tests passed!")
+                sys.exit(0)
+            else:
+                print("⚠ Some endpoints are not accessible.")
+                print("Please check your firewall configuration or network settings.")
+                sys.exit(1)
+                
+                
+        if __name__ == "__main__":
+            main()
+        EOF
+        
+        chmod +x scripts/test_connectivity.py
+        
+    - name: Create pytest configuration
+      run: |
+        cat > pytest.ini << 'EOF'
+        [tool:pytest]
+        testpaths = tests
+        python_files = test_*.py
+        python_classes = Test*
+        python_functions = test_*
+        addopts = 
+            --verbose
+            --tb=short
+            --strict-markers
+            --disable-warnings
+        markers =
+            slow: marks tests as slow (deselect with '-m "not slow"')
+            integration: marks tests as integration tests
+            unit: marks tests as unit tests
+        EOF
+        
+    - name: Generate final setup summary
+      run: |
+        echo "GitHub Copilot Development Environment Setup Complete!" 
+        echo "======================================================"
+        echo ""
+        echo "Created files:"
+        echo "- requirements.txt (Python dependencies)"
+        echo "- .env.example (Environment configuration template)"
+        echo "- src/tackle_hunger/ (Main package structure)"
+        echo "- tests/ (Test framework setup)"
+        echo "- scripts/ (Development utilities)"
+        echo "- docs/firewall-setup.md (Network configuration guide)"
+        echo ""
+        echo "Key Python libraries installed:"
+        echo "- gql (GraphQL client)"
+        echo "- requests/httpx (HTTP clients)"
+        echo "- pydantic (Data validation)"
+        echo "- python-dotenv (Environment management)"
+        echo "- pytest (Testing framework)"
+        echo ""
+        echo "Next steps for volunteers:"
+        echo "1. Copy this repository structure to your local development environment"
+        echo "2. Run: python scripts/setup_dev_environment.py"
+        echo "3. Edit .env file with API credentials from GitHub secrets"
+        echo "4. Test connectivity: python scripts/test_connectivity.py"
+        echo "5. Run tests: python -m pytest"
+        echo "6. Start developing charity validation operations!"
+        echo ""
+        echo "For firewall configuration, see: docs/firewall-setup.md"
+        
+    - name: Validate setup files
+      run: |
+        echo "Validating created files..."
+        
+        # Check that all expected files were created
+        files_to_check=(
+          "requirements.txt"
+          ".env.example"
+          "src/tackle_hunger/__init__.py"
+          "src/tackle_hunger/graphql_client.py"
+          "src/tackle_hunger/site_operations.py"
+          "tests/test_graphql_client.py"
+          "scripts/setup_dev_environment.py"
+          "scripts/test_connectivity.py"
+          "docs/firewall-setup.md"
+          "pytest.ini"
+        )
+        
+        missing_files=()
+        for file in "${files_to_check[@]}"; do
+          if [[ ! -f "$file" ]]; then
+            missing_files+=("$file")
+          else
+            echo "✓ $file"
+          fi
+        done
+        
+        if [[ ${#missing_files[@]} -eq 0 ]]; then
+          echo "✓ All required files created successfully"
+        else
+          echo "✗ Missing files: ${missing_files[*]}"
+          exit 1
+        fi
+        
+        # Test Python syntax
+        echo "Validating Python syntax..."
+        python -m py_compile src/tackle_hunger/__init__.py
+        python -m py_compile src/tackle_hunger/graphql_client.py
+        python -m py_compile src/tackle_hunger/site_operations.py
+        python -c "import sys; import ast; ast.parse(open('scripts/setup_dev_environment.py').read())"
+        python -c "import sys; import ast; ast.parse(open('scripts/test_connectivity.py').read())"
+        
+        echo "✓ All Python files have valid syntax"
+        
+    - name: Create development workflow summary
+      run: |
+        cat > VOLUNTEER_QUICK_START.md << 'EOF'
+        # Volunteer Quick Start Guide
+
+        Welcome to the Tackle Hunger Charity Validation project! This guide will get you productive in minutes.
+
+        ## 🚀 Quick Setup (5 minutes)
+
+        1. **Run the automated setup:**
+           ```bash
+           python scripts/setup_dev_environment.py
+           ```
+
+        2. **Configure your environment:**
+           - Edit `.env` file with API credentials (get from GitHub secrets/team lead)
+           - Test connectivity: `python scripts/test_connectivity.py`
+
+        3. **Verify everything works:**
+           ```bash
+           python -m pytest
+           ```
+
+        ## 📋 What You'll Be Working On
+
+        **Charity Validation Operations:**
+        - Validating charity site information (addresses, contacts, services)
+        - Updating charity organization details
+        - Ensuring data quality for food distribution network
+
+        **Key APIs:**
+        - GraphQL API for charity data (staging/production)
+        - Google Maps API for address verification
+
+        ## 🛠 Development Workflow
+
+        **For charity validation tasks:**
+        ```python
+        from src.tackle_hunger.graphql_client import TackleHungerClient
+        from src.tackle_hunger.site_operations import SiteOperations
+
+        # Initialize client
+        client = TackleHungerClient()
+        site_ops = SiteOperations(client)
+
+        # Get sites needing validation
+        sites = site_ops.get_sites_for_ai(limit=10)
+
+        # Process and update sites
+        # (Your validation logic here)
+        ```
+
+        ## 🔒 Security & API Keys
+
+        - **Never commit API keys** - they're in `.env` (git-ignored)
+        - Use **staging environment** for development
+        - Mark all operations with `createdMethod="AI_Copilot_Assistant"`
+
+        ## 🆘 Need Help?
+
+        - **Connectivity issues:** Check `docs/firewall-setup.md`
+        - **API questions:** See GraphQL schema in staging playground
+        - **Code questions:** All modules have detailed docstrings
+
+        ## 📊 Impact
+
+        Your work helps ensure accurate charity information reaches people who need food assistance. Every validated charity site helps connect families with resources!
+
+        **Ready to start? Run the setup script and begin making a difference! 🎯**
+        EOF
+
+        echo "✓ Created VOLUNTEER_QUICK_START.md"
