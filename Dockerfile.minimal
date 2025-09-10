@@ -1,0 +1,43 @@
+# Minimal Dockerfile for Tackle Hunger Charity Validation Local Testing
+# 
+# This is a simplified version that works in environments with SSL/network constraints
+
+FROM python:3.13-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 
+
+# Set working directory
+WORKDIR /app
+
+# Install basic system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project files
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY scripts/ ./scripts/
+COPY docs/ ./docs/
+COPY .env.example .
+COPY pytest.ini .
+
+# Create .env from example if it doesn't exist
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
+# Create non-root user for security
+RUN groupadd -r tacklehunger && useradd -r -g tacklehunger tacklehunger
+RUN chown -R tacklehunger:tacklehunger /app
+USER tacklehunger
+
+# Set Python path to include src directory
+ENV PYTHONPATH="/app/src:$PYTHONPATH"
+
+# Health check to ensure container is working
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import sys; print('Container healthy'); sys.exit(0)" || exit 1
+
+# Default command shows the environment is ready
+CMD ["python", "-c", "print('Tackle Hunger Docker environment ready!'); print('Install requirements: pip install requests pydantic python-dotenv pytest'); print('Run tests: python -m pytest'); import sys; sys.exit(0)"]

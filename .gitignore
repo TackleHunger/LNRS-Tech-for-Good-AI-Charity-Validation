@@ -171,3 +171,6 @@ venv/
 ENV/
 env/
 .venv/
+
+# Docker
+docker-compose.override.yml
