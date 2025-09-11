@@ -17,7 +17,7 @@ class TackleHungerConfig(BaseSettings):
     
     ai_scraping_token: str
     environment: str = "staging"
-    dev_endpoint: str = os.getenv("DEV_GRAPHQL_ENDPOINT")
+    dev_endpoint: str = os.getenv("DEV_GRAPHQL_ENDPOINT", "https://devapi.sboc.us/graphql")
     production_endpoint: str = "https://api.tacklehunger.org/graphql"
     timeout: int = 30
     rate_limit: int = 10
