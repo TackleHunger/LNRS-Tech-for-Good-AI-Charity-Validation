@@ -63,7 +63,6 @@ python -m pytest
 
 **Key APIs:**
 - GraphQL API for charity data (staging/production)
-- Google Maps API for address verification
 
 ## 🛠 Development Workflow
 

@@ -15,10 +15,9 @@ from pydantic import BaseSettings
 class TackleHungerConfig(BaseSettings):
     """Configuration for Tackle Hunger API client."""
     
-    api_key: str
-    api_secret: str
+    ai_scraping_token: str
     environment: str = "staging"
-    staging_endpoint: str = "https://staging-api.tacklehunger.org/graphql"
+    dev_endpoint: str = os.getenv("DEV_GRAPHQL_ENDPOINT")
     production_endpoint: str = "https://api.tacklehunger.org/graphql"
     timeout: int = 30
     rate_limit: int = 10
@@ -32,7 +31,7 @@ class TackleHungerConfig(BaseSettings):
         return (
             self.production_endpoint 
             if self.environment == "production" 
-            else self.staging_endpoint
+            else self.dev_endpoint
         )
 
 
@@ -48,8 +47,7 @@ class TackleHungerClient:
         transport = RequestsHTTPTransport(
             url=self.config.graphql_endpoint,
             headers={
-                "Authorization": f"Bearer {self.config.api_key}",
-                "X-API-Secret": self.config.api_secret,
+                "ai-scraping-token": self.config.ai_scraping_token,
             },
             timeout=self.config.timeout,
         )

@@ -89,15 +89,11 @@ jobs:
         # Copy this file to .env and fill in the actual values from GitHub secrets
         
         # GraphQL API Endpoints
-        STAGING_GRAPHQL_ENDPOINT=https://staging-api.tacklehunger.org/graphql
+        DEV_GRAPHQL_ENDPOINT=https://devapi.sboc.us/graphql
         PRODUCTION_GRAPHQL_ENDPOINT=https://api.tacklehunger.org/graphql
         
         # API Authentication
-        API_KEY=your_api_key_here
-        API_SECRET=your_api_secret_here
-        
-        # Google Maps API (for address standardization)
-        GOOGLE_MAPS_API_KEY=your_google_maps_key_here
+        AI_SCRAPING_TOKEN=your_ai_scraping_token_here
         
         # Environment Selection (staging|production)
         ENVIRONMENT=staging
@@ -154,10 +150,9 @@ jobs:
         class TackleHungerConfig(BaseSettings):
             """Configuration for Tackle Hunger API client."""
             
-            api_key: str
-            api_secret: str
+            ai_scraping_token: str
             environment: str = "staging"
-            staging_endpoint: str = "https://staging-api.tacklehunger.org/graphql"
+            dev_endpoint: str = os.getenv("DEV_GRAPHQL_ENDPOINT", "https://devapi.sboc.us/graphql")
             production_endpoint: str = "https://api.tacklehunger.org/graphql"
             timeout: int = 30
             rate_limit: int = 10
@@ -171,7 +166,7 @@ jobs:
                 return (
                     self.production_endpoint 
                     if self.environment == "production" 
-                    else self.staging_endpoint
+                    else self.dev_endpoint
                 )
         
         
@@ -187,8 +182,7 @@ jobs:
                 transport = RequestsHTTPTransport(
                     url=self.config.graphql_endpoint,
                     headers={
-                        "Authorization": f"Bearer {self.config.api_key}",
-                        "X-API-Secret": self.config.api_secret,
+                        "ai-scraping-token": self.config.ai_scraping_token,
                     },
                     timeout=self.config.timeout,
                 )
@@ -293,17 +287,16 @@ jobs:
         
         def test_config_defaults():
             """Test configuration defaults."""
-            config = TackleHungerConfig(api_key="test", api_secret="test")
+            config = TackleHungerConfig(ai_scraping_token="test")
             assert config.environment == "staging"
             assert config.timeout == 30
             assert config.rate_limit == 10
             
             
-        def test_staging_endpoint():
-            """Test staging endpoint selection."""
+        def test_dev_endpoint():
+            """Test dev endpoint selection."""
             config = TackleHungerConfig(
-                api_key="test", 
-                api_secret="test", 
+                ai_scraping_token="test", 
                 environment="staging"
             )
             assert "staging" in config.graphql_endpoint
@@ -312,8 +305,7 @@ jobs:
         def test_production_endpoint():
             """Test production endpoint selection."""
             config = TackleHungerConfig(
-                api_key="test", 
-                api_secret="test", 
+                ai_scraping_token="test", 
                 environment="production"
             )
             assert "staging" not in config.graphql_endpoint
@@ -379,10 +371,8 @@ jobs:
         def validate_environment():
             """Validate that required environment variables are set."""
             required_vars = [
-                "API_KEY",
-                "API_SECRET", 
-                "STAGING_GRAPHQL_ENDPOINT",
-                "GOOGLE_MAPS_API_KEY"
+                "AI_SCRAPING_TOKEN",
+                "DEV_GRAPHQL_ENDPOINT"
             ]
             
             missing_vars = []
@@ -451,12 +441,6 @@ jobs:
         - Port: 443 (HTTPS)
         - Protocol: HTTPS/GraphQL over POST
 
-        **Google Maps APIs (for address standardization):**
-        - `maps.googleapis.com` (Geocoding API)
-        - `places.googleapis.com` (Places API) 
-        - Port: 443 (HTTPS)
-        - Protocol: HTTPS/REST
-
         ### GitHub and Development Services
 
         **GitHub Services:**
@@ -478,9 +462,6 @@ jobs:
         ```bash
         # Tackle Hunger APIs
         *.tacklehunger.org
-        
-        # Google Maps APIs  
-        *.googleapis.com
         
         # GitHub Services
         *.github.com
@@ -581,8 +562,7 @@ jobs:
         
         REQUIRED_ENDPOINTS = [
             "https://api.tacklehunger.org/graphql",
-            "https://staging-api.tacklehunger.org/graphql", 
-            "https://maps.googleapis.com/maps/api/geocode/json",
+            "https://devapi.sboc.us/graphql", 
             "https://pypi.org/simple/requests/",
             "https://github.com",
             "https://api.github.com"
@@ -772,7 +752,6 @@ jobs:
 
         **Key APIs:**
         - GraphQL API for charity data (staging/production)
-        - Google Maps API for address verification
 
         ## 🛠 Development Workflow
 

@@ -12,8 +12,7 @@ from urllib.parse import urlparse
 
 REQUIRED_ENDPOINTS = [
     "https://api.tacklehunger.org/graphql",
-    "https://staging-api.tacklehunger.org/graphql", 
-    "https://maps.googleapis.com/maps/api/geocode/json",
+    "https://devapi.sboc.us/graphql", 
     "https://pypi.org/simple/requests/",
     "https://github.com",
     "https://api.github.com"

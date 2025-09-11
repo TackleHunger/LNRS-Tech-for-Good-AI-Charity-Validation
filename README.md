@@ -42,7 +42,7 @@ type SiteForAI {
 
   ### LOCATION DETAILS (Food Pickup/Dropoff/Distribution Address, avoid PO Boxes)
   #
-  # Any of these 4 changed triggers internal Location-Standardizing w/ Google Maps Geocode & Place Details APIs
+  # Any of these 4 changed triggers internal Location-Standardizing
   streetAddress: String # required for creation
   city: String # required for creation
   state: String # required for creation
@@ -55,8 +55,6 @@ type SiteForAI {
   neighborhood: String # updated if Location-Standardizing triggered, not very important
   lat: Float # updated if Location-Standardizing triggered
   lng: Float # updated if Location-Standardizing triggered
-  gmapsUrl: String # updated if Location-Standardizing triggered
-  placeId: String # updated if Location-Standardizing triggered
   ###
 
   ### CONTACT DETAILS
@@ -192,7 +190,7 @@ Here they are ordered for clarity & explained:
 input siteInputForAI {
   ### LOCATION DETAILS (Food Pickup/Dropoff/Distribution Address, avoid PO Boxes)
   #
-  # Any of these 4 changed triggers internal Location-Standardizing w/ Google Maps Geocode & Place Details APIs
+  # Any of these 4 changed triggers internal Location-Standardizing
   streetAddress: String! # required for creation
   city: String! # required for creation
   state: String! # required for creation
@@ -205,8 +203,6 @@ input siteInputForAI {
   neighborhood: String # updated if Location-Standardizing triggered, not very important
   lat: Float # updated if Location-Standardizing triggered
   lng: Float # updated if Location-Standardizing triggered
-  gmapsUrl: String # updated if Location-Standardizing triggered
-  placeId: String # updated if Location-Standardizing triggered
   ###
 
   ### CONTACT DETAILS
@@ -284,7 +280,7 @@ Here they are ordered for clarity & explained:
 input siteInputForAIUpdate {
   ### LOCATION DETAILS (Food Pickup/Dropoff/Distribution Address, avoid PO Boxes)
   #
-  # Any of these 4 changed triggers internal Location-Standardizing w/ Google Maps Geocode & Place Details APIs
+  # Any of these 4 changed triggers internal Location-Standardizing
   streetAddress: String # required for creation
   city: String # required for creation
   state: String # required for creation
@@ -297,8 +293,6 @@ input siteInputForAIUpdate {
   neighborhood: String # updated if Location-Standardizing triggered, not very important
   lat: Float # updated if Location-Standardizing triggered
   lng: Float # updated if Location-Standardizing triggered
-  gmapsUrl: String # updated if Location-Standardizing triggered
-  placeId: String # updated if Location-Standardizing triggered
   ###
 
   ### CONTACT DETAILS

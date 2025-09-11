@@ -11,17 +11,12 @@ This repository supports LexisNexis Risk Solutions' "Tech for Good" initiative f
 - **Production Environment**: Live charity data operations
 - **Operations**: Site and Organization CRUD operations for charity validation
 
-### Google Maps Integration
-- Geocoding API for address standardization
-- Place Details API for location verification
-
 ## Development Focus Areas
 
 ### Core Operations
 1. **Site Management**: Charity service locations with address, contact, and service details
 2. **Organization Management**: Parent charity organizations
 3. **Data Validation**: AI/API/ETL operations for charity information verification
-4. **Location Standardization**: Address verification and geocoding
 
 ### Key Data Structures
 - Sites (service locations) - 1-to-many relationship with Organizations
@@ -33,7 +28,6 @@ This repository supports LexisNexis Risk Solutions' "Tech for Good" initiative f
 
 The project uses GitHub Environment secrets stored in the "copilot" environment for:
 - GraphQL API endpoints and authentication
-- Google Maps API keys
 - Other backend system credentials
 
 ## Development Language
@@ -54,7 +48,6 @@ This codebase is designed for volunteers with limited time who need to be immedi
 ## Data Quality Standards
 
 When working with charity data:
-- Validate all address information
 - Ensure contact details are properly formatted
 - Handle missing or incomplete data gracefully
 - Maintain data provenance tracking (createdMethod, modifiedBy fields)

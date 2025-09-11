@@ -71,9 +71,7 @@ docker-compose --profile testing up test-runner
 2. **Edit .env with your credentials:**
    ```bash
    # Tackle Hunger API Configuration
-   API_KEY=your_actual_api_key_here
-   API_SECRET=your_actual_api_secret_here
-   GOOGLE_MAPS_API_KEY=your_google_maps_key_here
+   AI_SCRAPING_TOKEN=your_actual_ai_scraping_token_here
    
    # Use staging for development
    ENVIRONMENT=staging
@@ -87,9 +85,7 @@ The Docker setup supports these key environment variables:
 
 ```bash
 # API Configuration
-API_KEY=<your-api-key>
-API_SECRET=<your-api-secret>
-GOOGLE_MAPS_API_KEY=<your-google-maps-key>
+AI_SCRAPING_TOKEN=<your-ai-scraping-token>
 
 # Environment Selection
 ENVIRONMENT=staging  # or production
@@ -185,7 +181,7 @@ docker exec -it tackle-hunger-charity-validation cat /app/.env
 docker exec -it tackle-hunger-charity-validation python scripts/test_connectivity.py
 
 # Check network access from container
-docker exec -it tackle-hunger-charity-validation curl -I https://staging-api.tacklehunger.org/graphql
+docker exec -it tackle-hunger-charity-validation curl -I https://devapi.sboc.us/graphql
 ```
 
 **4. Permission issues:**
