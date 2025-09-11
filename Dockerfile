@@ -1,9 +1,10 @@
-# Dockerfile for Tackle Hunger Charity Validation Local Testing
+# Security-optimized Dockerfile for Tackle Hunger Charity Validation
 # 
-# This Dockerfile provides a consistent development environment for volunteers
-# working on charity validation operations.
+# This Dockerfile provides maximum security with minimal vulnerabilities
+# using Alpine Linux base image.
 
-FROM python:3.13-slim
+# Use Python 3.13 Alpine for minimal attack surface and better security
+FROM python:3.13-alpine
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -14,45 +15,51 @@ ENV PYTHONUNBUFFERED=1 \
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install minimal system dependencies with Alpine package manager
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache \
     curl \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for security early
+RUN addgroup -g 1000 tacklehunger && \
+    adduser -D -s /bin/sh -u 1000 -G tacklehunger tacklehunger
 
 # Copy requirements first for better layer caching
 COPY requirements.txt .
 
-# Install Python dependencies
-# Handle SSL issues in build environments
-RUN pip install --upgrade pip --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org && \
-    pip install -r requirements.txt --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
+# Install Python dependencies with security updates
+RUN python -m pip install --upgrade pip && \
+    python -m pip install --upgrade setuptools wheel && \
+    python -m pip install -r requirements.txt && \
+    python -m pip check
 
-# Copy project files
-COPY src/ ./src/
-COPY tests/ ./tests/
-COPY scripts/ ./scripts/
-COPY docs/ ./docs/
-COPY .env.example .
-COPY pytest.ini .
+# Copy project files with proper ownership
+COPY --chown=tacklehunger:tacklehunger src/ ./src/
+COPY --chown=tacklehunger:tacklehunger tests/ ./tests/
+COPY --chown=tacklehunger:tacklehunger scripts/ ./scripts/
+COPY --chown=tacklehunger:tacklehunger docs/ ./docs/
+COPY --chown=tacklehunger:tacklehunger .env.example .
+COPY --chown=tacklehunger:tacklehunger pytest.ini .
 
 # Create .env from example if it doesn't exist
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
+RUN if [ ! -f .env ]; then cp .env.example .env && chown tacklehunger:tacklehunger .env; fi
 
-# Create non-root user for security
-RUN groupadd -r tacklehunger && useradd -r -g tacklehunger tacklehunger
-RUN chown -R tacklehunger:tacklehunger /app
+# Switch to non-root user
 USER tacklehunger
 
 # Expose port for any future web services
 EXPOSE 8000
 
 # Set Python path to include src directory
-ENV PYTHONPATH="/app/src:$PYTHONPATH"
+ENV PYTHONPATH="/app/src"
 
 # Health check to ensure container is working
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import sys; print('Container healthy'); sys.exit(0)" || exit 1
+    CMD python3 -c "import sys; print('Container healthy')" || exit 1
 
-# Default command runs the connectivity test and then starts interactive shell
+# Default command runs the connectivity test
 CMD ["python", "scripts/test_connectivity.py"]

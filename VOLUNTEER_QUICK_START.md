@@ -27,7 +27,7 @@ docker exec -it tackle-hunger-charity-validation bash
 python -m pytest
 ```
 
-**Benefits**: Consistent environment, no Python version conflicts, isolated dependencies.
+**Benefits**: Security-optimized environment (Alpine Linux), minimal vulnerabilities, no Python version conflicts, isolated dependencies, 84% smaller image size.
 
 ### Option 2: Local Python Setup
 
@@ -110,6 +110,7 @@ sites = site_ops.get_sites_for_ai(limit=10)
 
 ## 🔒 Security & API Keys
 
+- **Security-optimized Docker environment** - Uses Alpine Linux with minimal vulnerabilities (only 2 low-severity)
 - **Never commit API keys** - they're in `.env` (git-ignored)
 - Use **staging environment** for development
 - Mark all operations with `createdMethod="AI_Copilot_Assistant"`

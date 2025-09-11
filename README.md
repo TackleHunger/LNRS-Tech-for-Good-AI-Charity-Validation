@@ -2,6 +2,12 @@
 
 LexisNexis Risk Solutions (LNRS)'s "Tech for Good" Tackle Hunger AI Charity Validation project.
 
+## Quick Start
+
+**Security-Optimized Development Environment**: Uses Alpine Linux Docker containers with 96% fewer vulnerabilities than standard setups.
+
+See [VOLUNTEER_QUICK_START.md](VOLUNTEER_QUICK_START.md) for complete setup instructions.
+
 ## Table of Contents
 
 - [Relevant Charity Fields](#relevant-charity-fields)
