@@ -1,0 +1,56 @@
+# Docker Compose configuration for Tackle Hunger Charity Validation
+#
+# This provides an easy way to run the complete development environment
+# with proper environment variable management and volume mounting.
+
+version: '3.8'
+
+services:
+  tackle-hunger-dev:
+    build: .
+    container_name: tackle-hunger-charity-validation
+    volumes:
+      # Mount source code for live development
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./scripts:/app/scripts
+      # Mount environment file
+      - ./.env:/app/.env:ro
+    environment:
+      # Default environment settings
+      - ENVIRONMENT=dev
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=json
+      - PYTHONPATH=/app/src
+    ports:
+      # Map port for any future web services
+      - '8000:8000'
+    # Override default command for interactive development
+    command: >
+      sh -c "
+        echo 'Starting Tackle Hunger development environment...' &&
+        python scripts/test_connectivity.py &&
+        echo 'Environment ready! Run: docker exec -it tackle-hunger-charity-validation bash' &&
+        tail -f /dev/null
+      "
+    # Enable TTY for interactive use
+    tty: true
+    stdin_open: true
+
+  # Optional: Add a test runner service
+  test-runner:
+    build: .
+    container_name: tackle-hunger-tests
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./.env:/app/.env:ro
+    environment:
+      - ENVIRONMENT=dev
+      - PYTHONPATH=/app/src
+    command: ['python', '-m', 'pytest', '-v']
+    profiles: ['testing']
+
+networks:
+  default:
+    name: tackle-hunger-network
