@@ -57,11 +57,13 @@ python -m pytest
 ## 📋 What You'll Be Working On
 
 **Charity Validation Operations:**
+
 - Validating charity site information (addresses, contacts, services)
 - Updating charity organization details
 - Ensuring data quality for food distribution network
 
 **Key APIs:**
+
 - GraphQL API for charity data (staging/production)
 
 ## 🛠 Development Workflow
@@ -93,6 +95,7 @@ docker exec -it tackle-hunger-charity-validation python
 ### Local Python Workflow
 
 **For charity validation tasks:**
+
 ```python
 from src.tackle_hunger.graphql_client import TackleHungerClient
 from src.tackle_hunger.site_operations import SiteOperations
@@ -112,17 +115,19 @@ sites = site_ops.get_sites_for_ai(limit=10)
 
 - **Security-optimized Docker environment** - Uses Alpine Linux with minimal vulnerabilities (only 2 low-severity)
 - **Never commit API keys** - they're in `.env` (git-ignored)
-- Use **staging environment** for development
+- Use **dev environment** for development
 - Mark all operations with `createdMethod="AI_Copilot_Assistant"`
 
 ## 🆘 Need Help?
 
 ### Docker Issues
+
 - **Setup problems:** See `docs/docker-setup.md`
 - **Container won't start:** `docker-compose logs tackle-hunger-dev`
 - **Environment variables:** `docker exec -it tackle-hunger-charity-validation cat /app/.env`
 
 ### General Issues
+
 - **Connectivity issues:** Check `docs/firewall-setup.md`
 - **API questions:** See GraphQL schema in staging playground
 - **Code questions:** All modules have detailed docstrings
@@ -130,6 +135,7 @@ sites = site_ops.get_sites_for_ai(limit=10)
 ## 🔄 Quick Commands Reference
 
 ### Docker Commands
+
 ```bash
 # Start environment
 docker-compose up -d
@@ -148,6 +154,7 @@ docker-compose down
 ```
 
 ### Local Commands
+
 ```bash
 # Set up environment
 python scripts/setup_dev_environment.py
@@ -166,6 +173,7 @@ Your work helps ensure accurate charity information reaches people who need food
 ## 🎯 Ready to Start?
 
 **Choose your setup method:**
+
 - **New to development or want consistency?** → Use Docker setup
 - **Prefer local development?** → Use Python setup
 - **Want to try both?** → Start with Docker, switch to local later

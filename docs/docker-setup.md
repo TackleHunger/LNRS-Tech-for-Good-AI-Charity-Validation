@@ -5,6 +5,7 @@
 This document explains how to use Docker for local development and testing of the Tackle Hunger charity validation system. Docker provides a consistent, security-optimized environment across different machines and simplifies setup for volunteers.
 
 **Security Features:**
+
 - Alpine Linux base with minimal attack surface
 - Only 2 low-severity vulnerabilities (96% reduction from standard images)
 - Non-root user execution
@@ -22,6 +23,7 @@ This document explains how to use Docker for local development and testing of th
 ### 1. Basic Docker Setup
 
 **Build and run the container:**
+
 ```bash
 # Build the Docker image
 docker build -t tackle-hunger-charity-validation .
@@ -33,6 +35,7 @@ docker run -it --name tackle-hunger-dev tackle-hunger-charity-validation
 ### 2. Docker Compose Setup (Recommended)
 
 **For interactive development:**
+
 ```bash
 # Start the development environment
 docker-compose up -d
@@ -48,6 +51,7 @@ python scripts/test_connectivity.py
 ```
 
 **For running tests only:**
+
 ```bash
 # Run tests using the test profile
 docker-compose --profile testing up test-runner
@@ -56,6 +60,7 @@ docker-compose --profile testing up test-runner
 ### 3. Development Workflow
 
 **Volume mounting for live development:**
+
 ```bash
 # The docker-compose.yml automatically mounts:
 # - ./src:/app/src (source code)
@@ -71,17 +76,19 @@ docker-compose --profile testing up test-runner
 ### Setting Up API Credentials
 
 1. **Copy environment template:**
+
    ```bash
    cp .env.example .env
    ```
 
 2. **Edit .env with your credentials:**
+
    ```bash
    # Tackle Hunger API Configuration
    AI_SCRAPING_TOKEN=your_actual_ai_scraping_token_here
-   
-   # Use staging for development
-   ENVIRONMENT=staging
+
+   # Use dev for development
+   ENVIRONMENT=dev
    ```
 
 3. **Credentials are automatically mounted into the container via docker-compose.yml**
@@ -95,7 +102,7 @@ The Docker setup supports these key environment variables:
 AI_SCRAPING_TOKEN=<your-ai-scraping-token>
 
 # Environment Selection
-ENVIRONMENT=staging  # or production
+ENVIRONMENT=dev  # or copilot|staging|production
 
 # Logging
 LOG_LEVEL=INFO
@@ -165,6 +172,7 @@ print(f'Found {len(sites)} sites for validation')
 ### Common Issues
 
 **1. Container won't start:**
+
 ```bash
 # Check logs
 docker-compose logs tackle-hunger-dev
@@ -174,6 +182,7 @@ docker-compose build --no-cache
 ```
 
 **2. Environment variables not loading:**
+
 ```bash
 # Verify .env file exists and has correct format
 cat .env
@@ -183,6 +192,7 @@ docker exec -it tackle-hunger-charity-validation cat /app/.env
 ```
 
 **3. API connectivity issues:**
+
 ```bash
 # Run connectivity test
 docker exec -it tackle-hunger-charity-validation python scripts/test_connectivity.py
@@ -192,6 +202,7 @@ docker exec -it tackle-hunger-charity-validation curl -I https://devapi.sboc.us/
 ```
 
 **4. Permission issues:**
+
 ```bash
 # The container runs as non-root user 'tacklehunger' for security
 # Uses Alpine Linux with minimal packages for reduced attack surface
@@ -203,6 +214,7 @@ docker exec -it --user root tackle-hunger-charity-validation apk add <package-na
 ```
 
 **5. Port conflicts:**
+
 ```bash
 # If port 8000 is already in use, modify docker-compose.yml:
 ports:
@@ -212,6 +224,7 @@ ports:
 ### Performance Optimization
 
 **Security and size benefits:**
+
 ```bash
 # Alpine Linux base provides:
 # - 84% smaller image size (17MB vs 109MB)
@@ -221,6 +234,7 @@ ports:
 ```
 
 **For faster builds:**
+
 ```bash
 # Use BuildKit for faster builds
 DOCKER_BUILDKIT=1 docker build -t tackle-hunger-charity-validation .
@@ -230,6 +244,7 @@ export DOCKER_BUILDKIT=1
 ```
 
 **Volume performance (Windows/Mac):**
+
 ```bash
 # For better I/O performance on Windows/Mac, consider using
 # named volumes instead of bind mounts for large dependency trees
@@ -287,6 +302,7 @@ The Docker setup can be used in CI/CD pipelines:
 ## Support
 
 For Docker-related issues:
+
 1. Check this documentation
 2. Review Docker logs: `docker-compose logs`
 3. Verify environment configuration

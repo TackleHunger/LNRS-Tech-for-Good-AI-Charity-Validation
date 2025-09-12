@@ -7,18 +7,22 @@ This repository supports LexisNexis Risk Solutions' "Tech for Good" initiative f
 ## Key Systems and APIs
 
 ### GraphQL API
-- **Staging Environment**: Used for development and testing
+
+- **Dev Environment**: Used for development & testing
+- **Staging Environment**: Used for more formal testing
 - **Production Environment**: Live charity data operations
 - **Operations**: Site and Organization CRUD operations for charity validation
 
 ## Development Focus Areas
 
 ### Core Operations
+
 1. **Site Management**: Charity service locations with address, contact, and service details
 2. **Organization Management**: Parent charity organizations
 3. **Data Validation**: AI/API/ETL operations for charity information verification
 
 ### Key Data Structures
+
 - Sites (service locations) - 1-to-many relationship with Organizations
 - Organizations (parent charity entities)
 - Contact information (public and internal)
@@ -27,12 +31,14 @@ This repository supports LexisNexis Risk Solutions' "Tech for Good" initiative f
 ## Environment Configuration
 
 The project uses GitHub Environment secrets stored in the "copilot" environment for:
+
 - GraphQL API endpoints and authentication
 - Other backend system credentials
 
 ## Development Language
 
 **Primary Language**: Python 3.13
+
 - Focus on GraphQL client operations
 - Data validation and transformation
 - API integration and error handling
@@ -40,6 +46,7 @@ The project uses GitHub Environment secrets stored in the "copilot" environment 
 ## Volunteer Guidelines
 
 This codebase is designed for volunteers with limited time who need to be immediately productive. Code should be:
+
 - Well-documented and self-explanatory
 - Modular and reusable
 - Error-resistant with clear failure modes
@@ -48,6 +55,7 @@ This codebase is designed for volunteers with limited time who need to be immedi
 ## Data Quality Standards
 
 When working with charity data:
+
 - Ensure contact details are properly formatted
 - Handle missing or incomplete data gracefully
 - Maintain data provenance tracking (createdMethod, modifiedBy fields)

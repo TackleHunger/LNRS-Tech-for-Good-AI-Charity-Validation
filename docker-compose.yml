@@ -18,13 +18,13 @@ services:
       - ./.env:/app/.env:ro
     environment:
       # Default environment settings
-      - ENVIRONMENT=staging
+      - ENVIRONMENT=dev
       - LOG_LEVEL=INFO
       - LOG_FORMAT=json
       - PYTHONPATH=/app/src
     ports:
       # Map port for any future web services
-      - "8000:8000"
+      - '8000:8000'
     # Override default command for interactive development
     command: >
       sh -c "
@@ -46,10 +46,10 @@ services:
       - ./tests:/app/tests
       - ./.env:/app/.env:ro
     environment:
-      - ENVIRONMENT=staging
+      - ENVIRONMENT=dev
       - PYTHONPATH=/app/src
-    command: ["python", "-m", "pytest", "-v"]
-    profiles: ["testing"]
+    command: ['python', '-m', 'pytest', '-v']
+    profiles: ['testing']
 
 networks:
   default:
