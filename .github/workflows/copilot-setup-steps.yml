@@ -295,9 +295,9 @@ jobs:
               """Test dev endpoint selection."""
               config = TackleHungerConfig(
                   ai_scraping_token="test",
-                  environment="staging"
+                  environment="dev"
               )
-              assert "staging" in config.graphql_endpoint
+              assert "dev" in config.graphql_endpoint
 
 
           def test_production_endpoint():
@@ -434,8 +434,9 @@ jobs:
           ### Core API Endpoints
 
           **Tackle Hunger GraphQL APIs:**
-          - `api.tacklehunger.org` (Production API)
-          - `staging-api.tacklehunger.org` (Staging API)
+          - `api.sboc.us/graphql` (Production API)
+          - `stagingapi.sboc.us/graphql` (Staging API)
+          - `devapi.sboc.us/graphql` (Dev API)
           - Port: 443 (HTTPS)
           - Protocol: HTTPS/GraphQL over POST
 
@@ -459,7 +460,7 @@ jobs:
           **Allow Outbound HTTPS (port 443) to:**
           ```bash
           # Tackle Hunger APIs
-          *.tacklehunger.org
+          *.sboc.us
 
           # GitHub Services
           *.github.com
@@ -559,7 +560,6 @@ jobs:
 
 
           REQUIRED_ENDPOINTS = [
-              "https://api.tacklehunger.org/graphql",
               "https://devapi.sboc.us/graphql",
               "https://pypi.org/simple/requests/",
               "https://github.com",
