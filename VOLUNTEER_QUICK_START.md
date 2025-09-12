@@ -64,7 +64,7 @@ python -m pytest
 
 **Key APIs:**
 
-- GraphQL API for charity data (staging/production)
+- GraphQL API for charity data (dev/staging/production)
 
 ## 🛠 Development Workflow
 

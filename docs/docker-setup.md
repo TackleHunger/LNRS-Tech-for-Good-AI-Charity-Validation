@@ -102,7 +102,7 @@ The Docker setup supports these key environment variables:
 AI_SCRAPING_TOKEN=<your-ai-scraping-token>
 
 # Environment Selection
-ENVIRONMENT=dev  # or copilot|staging|production
+ENVIRONMENT=dev  # or staging|production
 
 # Logging
 LOG_LEVEL=INFO

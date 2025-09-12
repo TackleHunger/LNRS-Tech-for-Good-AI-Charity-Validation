@@ -286,7 +286,7 @@ jobs:
           def test_config_defaults():
               """Test configuration defaults."""
               config = TackleHungerConfig(ai_scraping_token="test")
-              assert config.environment == "staging"
+              assert config.environment == "dev"
               assert config.timeout == 30
               assert config.rate_limit == 10
 
@@ -502,7 +502,7 @@ jobs:
           **API Key Security:**
           - Store API keys in GitHub environment secrets only
           - Never commit API keys to source code
-          - Use environment-specific keys (staging vs production)
+          - Use environment-specific keys (dev vs. staging vs. production)
           - Rotate keys regularly per security policy
 
           **Data Privacy:**
@@ -749,7 +749,7 @@ jobs:
           - Ensuring data quality for food distribution network
 
           **Key APIs:**
-          - GraphQL API for charity data (staging/production)
+          - GraphQL API for charity data (dev/staging/production)
 
           ## 🛠 Development Workflow
 
@@ -772,13 +772,13 @@ jobs:
           ## 🔒 Security & API Keys
 
           - **Never commit API keys** - they're in `.env` (git-ignored)
-          - Use **staging environment** for development
+          - Use **dev environment** for development
           - Mark all operations with `createdMethod="AI_Copilot_Assistant"`
 
           ## 🆘 Need Help?
 
           - **Connectivity issues:** Check `docs/firewall-setup.md`
-          - **API questions:** See GraphQL schema in staging playground
+          - **API questions:** See GraphQL schema in the [API playground](https://devapi.sboc.us/graphql)
           - **Code questions:** All modules have detailed docstrings
 
           ## 📊 Impact
