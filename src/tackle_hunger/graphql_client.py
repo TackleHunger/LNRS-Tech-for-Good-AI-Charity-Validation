@@ -6,10 +6,10 @@ Provides authenticated GraphQL operations for charity validation.
 
 import os
 from typing import Optional, Dict, Any
-import requests
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 
 class TackleHungerConfig(BaseSettings):
@@ -21,17 +21,12 @@ class TackleHungerConfig(BaseSettings):
     timeout: int = 30
     rate_limit: int = 10
 
-    class Config:
-        env_file = ".env"
+    model_config = ConfigDict(env_file=".env")
 
     @property
     def graphql_endpoint(self) -> str:
         """Get the appropriate GraphQL endpoint based on environment."""
-        return (
-            self.production_endpoint
-            if self.environment == "production"
-            else self.tkh_graphql_endpoint
-        )
+        return self.production_endpoint if self.environment == "production" else self.tkh_graphql_endpoint
 
 
 class TackleHungerClient:
