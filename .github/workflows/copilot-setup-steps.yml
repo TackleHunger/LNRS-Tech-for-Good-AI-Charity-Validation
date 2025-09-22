@@ -17,7 +17,7 @@ env:
   PYTHON_VERSION: '3.13'
 
 jobs:
-  setup-copilot-environment:
+  copilot-setup-steps:
     runs-on: ubuntu-latest
     environment: copilot
 
