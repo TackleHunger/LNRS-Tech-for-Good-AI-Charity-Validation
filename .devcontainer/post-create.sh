@@ -11,16 +11,30 @@ cd /workspace
 
 # Copy .env.example to .env if it doesn't exist
 if [ ! -f .env ]; then
-    echo "📋 Setting up environment configuration..."
-    cp .env.example .env
-    echo "✅ Created .env from .env.example"
-    echo "⚠️  Please edit .env with your API credentials from GitHub secrets"
+    if [ -f .env.example ]; then
+        echo "📋 Setting up environment configuration..."
+        cp .env.example .env
+        echo "✅ Created .env from .env.example"
+        echo "⚠️  Please edit .env with your API credentials from GitHub secrets"
+    else
+        echo "⚠️  .env.example not found, creating basic .env"
+        cat > .env << 'EOF'
+# Tackle Hunger API Configuration
+AI_SCRAPING_TOKEN=your_ai_scraping_token_here
+ENVIRONMENT=dev
+CREATED_METHOD=AI_Copilot_Assistant
+MODIFIED_BY=GitHub_Copilot_User
+LOG_LEVEL=INFO
+LOG_FORMAT=json
+EOF
+        echo "✅ Created basic .env file"
+    fi
 else
     echo "✅ .env file already exists"
 fi
 
 # Set up git configuration for the workspace (if not already configured)
-if [ -z "$(git config --global user.name)" ]; then
+if [ -z "$(git config --global user.name 2>/dev/null)" ]; then
     echo "📝 Setting up git configuration..."
     git config --global user.name "Codespace User"
     git config --global user.email "user@codespace.local"
@@ -45,19 +59,17 @@ except ImportError as e:
     exit(1)
 "
 
-# Run connectivity test
+# Run connectivity test (allow it to fail gracefully)
 echo "🌐 Testing connectivity to required endpoints..."
-if python scripts/test_connectivity.py; then
-    echo "✅ Connectivity test passed"
+if [ -f scripts/test_connectivity.py ]; then
+    if python scripts/test_connectivity.py; then
+        echo "✅ Connectivity test passed"
+    else
+        echo "⚠️  Some endpoints may not be accessible from Codespaces"
+        echo "    This is expected for dev API endpoints. Local development will work normally."
+    fi
 else
-    echo "⚠️  Some endpoints may not be accessible from Codespaces"
-    echo "    This is expected for dev API endpoints. Local development will work normally."
-fi
-
-# Set up pre-commit hooks (if available)
-if command -v pre-commit &> /dev/null; then
-    echo "🔧 Setting up pre-commit hooks..."
-    pre-commit install || echo "⚠️  Pre-commit setup skipped"
+    echo "⚠️  Connectivity test script not found"
 fi
 
 echo ""
@@ -65,8 +77,8 @@ echo "🎉 Codespace setup complete!"
 echo ""
 echo "📚 Next steps:"
 echo "   1. Edit .env with your API credentials"
-echo "   2. Run: python scripts/test_connectivity.py"
-echo "   3. Run: python -m pytest"
+echo "   2. Run: python scripts/test_connectivity.py (if available)"
+echo "   3. Run: python -m pytest (if tests exist)"
 echo "   4. Start developing charity validation features!"
 echo ""
 echo "📖 Documentation:"

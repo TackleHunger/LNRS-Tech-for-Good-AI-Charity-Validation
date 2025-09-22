@@ -1,7 +1,10 @@
 {
 	"name": "Tackle Hunger Charity Validation",
-	"dockerFile": "Dockerfile",
-	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+	"dockerfile": "Dockerfile",
+	"build": {
+		"context": "..",
+		"dockerfile": ".devcontainer/Dockerfile"
+	},
 	"workspaceFolder": "/workspace",
 	
 	"customizations": {
@@ -56,19 +59,5 @@
 		"LOG_FORMAT": "json"
 	},
 
-	"remoteUser": "tacklehunger",
-	"updateRemoteUserUID": true,
-
-	"features": {
-		"ghcr.io/devcontainers/features/git:1": {
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/github-cli:1": {
-			"version": "latest"
-		}
-	},
-
-	"mounts": [
-		"source=${localWorkspaceFolder}/.env.example,target=/workspace/.env,type=bind,consistency=cached"
-	]
+	"remoteUser": "tacklehunger"
 }

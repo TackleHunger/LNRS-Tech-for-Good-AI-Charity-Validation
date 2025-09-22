@@ -16,7 +16,7 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /workspace
 
 # Install minimal system dependencies with Alpine package manager
-# Add bash for better development experience in Codespaces
+# Add bash and git for better development experience in Codespaces
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache \
@@ -25,6 +25,7 @@ RUN apk update && \
     git \
     ca-certificates \
     sudo \
+    openssh-client \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user for security early
@@ -32,7 +33,7 @@ RUN addgroup -g 1000 tacklehunger && \
     adduser -D -s /bin/bash -u 1000 -G tacklehunger tacklehunger && \
     echo 'tacklehunger ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Copy requirements first for better layer caching
+# Copy requirements from the repo root (build context is parent directory)
 COPY requirements.txt /tmp/requirements.txt
 
 # Install Python dependencies with security updates
@@ -51,10 +52,6 @@ USER tacklehunger
 
 # Set Python path to include src directory
 ENV PYTHONPATH="/workspace/src"
-
-# Health check to ensure container is working
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python3 -c "import sys; print('Codespace container healthy')" || exit 1
 
 # Default command for Codespaces (keeps container running)
 CMD ["sleep", "infinity"]

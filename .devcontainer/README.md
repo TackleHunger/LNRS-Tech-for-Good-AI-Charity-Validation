@@ -7,6 +7,7 @@ This directory contains the configuration for GitHub Codespaces, providing a clo
 ### `devcontainer.json`
 Main configuration file that defines:
 - **Base Image**: Security-optimized Python 3.13 Alpine Linux container
+- **Build Context**: Proper build configuration with parent directory context
 - **VS Code Extensions**: Pre-installed Python development tools, linters, formatters
 - **Port Forwarding**: Automatic forwarding of port 8000 for development server
 - **Environment Variables**: Pre-configured Python path and logging settings
@@ -16,13 +17,14 @@ Main configuration file that defines:
 Custom Docker image based on the existing security-optimized setup:
 - **Alpine Linux**: Minimal attack surface with only essential packages
 - **Python 3.13**: Latest Python with all required dependencies
-- **Development Tools**: Git, curl, bash for enhanced development experience
+- **Development Tools**: Git, curl, bash, ssh client for enhanced development experience
 - **Security**: Non-root user with sudo access for development tasks
+- **Build Context**: Optimized to work with devcontainer build process
 
 ### `post-create.sh`
 Automatic setup script that runs after container creation:
-- **Environment Setup**: Creates `.env` from template
-- **Connectivity Testing**: Verifies API endpoints accessibility
+- **Environment Setup**: Creates `.env` from template or provides fallback
+- **Connectivity Testing**: Verifies API endpoints accessibility (graceful failure)
 - **Git Configuration**: Sets up basic git configuration
 - **Dependency Validation**: Confirms all Python packages are working
 
@@ -55,7 +57,7 @@ Automatic setup script that runs after container creation:
 
 2. **Test Setup:**
    ```bash
-   # Test connectivity
+   # Test connectivity (may fail gracefully for some endpoints)
    python scripts/test_connectivity.py
    
    # Run tests
@@ -73,6 +75,15 @@ Automatic setup script that runs after container creation:
    # Lint code
    python -m flake8 src/
    ```
+
+## Recent Fixes
+
+### Docker Build Issues Resolution
+- **Fixed `dockerFile` casing**: Changed to `dockerfile` (lowercase) for proper devcontainer recognition
+- **Updated build context**: Added explicit build configuration to ensure requirements.txt is accessible
+- **Removed conflicting features**: Eliminated git/github-cli features that conflicted with Alpine base
+- **Simplified workspace mounting**: Removed complex mount configurations that caused build failures
+- **Enhanced error handling**: Updated post-create script to handle missing files gracefully
 
 ## Features
 
@@ -104,6 +115,11 @@ Automatic setup script that runs after container creation:
 - Check GitHub Codespaces status page
 - Try creating a new codespace
 - Contact GitHub support if persistent
+
+**Docker build failures:**
+- Ensure the configuration follows devcontainer best practices
+- Check that requirements.txt is accessible in build context
+- Verify Dockerfile syntax with `docker build` locally
 
 **Extensions not loading:**
 - Reload VS Code window: `Ctrl+Shift+P` → "Developer: Reload Window"

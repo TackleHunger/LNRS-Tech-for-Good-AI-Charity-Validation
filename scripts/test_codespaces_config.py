@@ -21,11 +21,15 @@ def test_devcontainer_json():
     with open(devcontainer_path) as f:
         config = json.load(f)
     
-    # Check required fields
-    required_fields = ["name", "dockerFile", "customizations", "forwardPorts"]
+    # Check required fields (updated for new structure)
+    required_fields = ["name", "customizations", "forwardPorts"]
     for field in required_fields:
         if field not in config:
             raise ValueError(f"Missing required field: {field}")
+    
+    # Check that we have either dockerfile or build configuration
+    if "dockerfile" not in config and "build" not in config:
+        raise ValueError("Missing dockerfile or build configuration")
     
     # Check VS Code extensions
     extensions = config["customizations"]["vscode"]["extensions"]
