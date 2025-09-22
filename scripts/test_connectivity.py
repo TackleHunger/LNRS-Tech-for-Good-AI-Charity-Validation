@@ -18,7 +18,7 @@ REQUIRED_ENDPOINTS = [
 ]
 
 
-def check_endpoint(url: str, timeout: int = 10) -> bool:
+def test_endpoint(url: str, timeout: int = 10) -> bool:
     """Test connectivity to a single endpoint."""
     try:
         parsed = urlparse(url)
@@ -55,7 +55,7 @@ def main():
     total_count = len(REQUIRED_ENDPOINTS)
 
     for endpoint in REQUIRED_ENDPOINTS:
-        if check_endpoint(endpoint):
+        if test_endpoint(endpoint):
             success_count += 1
 
     print("=" * 50)

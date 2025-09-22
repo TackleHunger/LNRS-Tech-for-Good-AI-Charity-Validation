@@ -34,6 +34,7 @@ RUN apk update && \
     build-base \
     libffi-dev \
     openssl-dev \
+    wget \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user for security

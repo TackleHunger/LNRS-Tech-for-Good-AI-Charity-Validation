@@ -4,11 +4,6 @@
     "dockerfile": "Dockerfile",
     "context": ".."
   },
-  
-  "features": {
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
-  },
 
   "customizations": {
     "vscode": {
@@ -26,7 +21,7 @@
         "redhat.vscode-yaml"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.defaultInterpreterPath": "/usr/bin/python3",
         "python.formatting.provider": "black",
         "python.linting.enabled": true,
         "python.linting.flake8Enabled": true,

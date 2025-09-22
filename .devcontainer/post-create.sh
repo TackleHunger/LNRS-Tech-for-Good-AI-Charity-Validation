@@ -23,6 +23,25 @@ chmod +x scripts/*.py
 echo "📦 Ensuring all Python dependencies are installed..."
 pip install --user pydantic-settings ipython
 
+# Install GitHub CLI if not available
+echo "🔧 Checking GitHub CLI availability..."
+if ! command -v gh &> /dev/null; then
+    echo "Installing GitHub CLI..."
+    # For Alpine Linux in Codespaces, try installing via apk or binary
+    if command -v apk &> /dev/null; then
+        # Try to install from Alpine community repository
+        sudo apk add --no-cache github-cli || {
+            echo "Installing GitHub CLI from binary..."
+            wget -q https://github.com/cli/cli/releases/latest/download/gh_*_linux_amd64.tar.gz -O /tmp/gh.tar.gz
+            tar -xf /tmp/gh.tar.gz -C /tmp/
+            sudo mv /tmp/gh_*/bin/gh /usr/local/bin/
+            rm -rf /tmp/gh.tar.gz /tmp/gh_*
+        }
+    fi
+else
+    echo "✅ GitHub CLI already available"
+fi
+
 # Test Python imports
 echo "🐍 Testing Python environment..."
 python3 -c "
