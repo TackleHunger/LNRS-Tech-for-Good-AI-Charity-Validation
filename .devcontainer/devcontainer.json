@@ -1,6 +1,5 @@
 {
 	"name": "Tackle Hunger Charity Validation",
-	"dockerfile": "Dockerfile",
 	"build": {
 		"context": "..",
 		"dockerfile": ".devcontainer/Dockerfile"

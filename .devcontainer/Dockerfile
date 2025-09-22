@@ -33,7 +33,7 @@ RUN addgroup -g 1000 tacklehunger && \
     adduser -D -s /bin/bash -u 1000 -G tacklehunger tacklehunger && \
     echo 'tacklehunger ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Copy requirements from the repo root (build context is parent directory)
+# Copy requirements from the repo root (build context is repo root)
 COPY requirements.txt /tmp/requirements.txt
 
 # Install Python dependencies with security updates

@@ -78,7 +78,14 @@ Automatic setup script that runs after container creation:
 
 ## Recent Fixes
 
-### Docker Build Issues Resolution
+### Docker Build Issues Resolution (Final Fix)
+- **Root cause identified**: Conflicting dockerfile configuration causing incorrect path resolution
+- **Fixed path resolution**: Removed conflicting `dockerfile` property when using `build` configuration  
+- **Corrected build context**: Set context to parent directory (`..`) with dockerfile path `.devcontainer/Dockerfile`
+- **Verified requirements.txt access**: Build context now correctly includes requirements.txt from repo root
+- **Validated configuration**: All JSON syntax and Docker build context tests pass
+
+### Previous Docker Build Issues Resolution
 - **Fixed `dockerFile` casing**: Changed to `dockerfile` (lowercase) for proper devcontainer recognition
 - **Updated build context**: Added explicit build configuration to ensure requirements.txt is accessible
 - **Removed conflicting features**: Eliminated git/github-cli features that conflicted with Alpine base

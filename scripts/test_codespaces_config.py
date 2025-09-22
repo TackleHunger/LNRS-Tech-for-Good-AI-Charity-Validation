@@ -31,6 +31,12 @@ def test_devcontainer_json():
     if "dockerfile" not in config and "build" not in config:
         raise ValueError("Missing dockerfile or build configuration")
     
+    # If build is present, check its structure
+    if "build" in config:
+        build_config = config["build"]
+        if "context" not in build_config or "dockerfile" not in build_config:
+            raise ValueError("Build configuration missing context or dockerfile")
+    
     # Check VS Code extensions
     extensions = config["customizations"]["vscode"]["extensions"]
     required_extensions = ["ms-python.python", "GitHub.copilot"]
