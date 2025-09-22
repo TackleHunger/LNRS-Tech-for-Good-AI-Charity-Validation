@@ -35,13 +35,16 @@ RUN apk update && \
     libffi-dev \
     openssl-dev \
     wget \
+    sudo \
+    github-cli \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user for security
 RUN addgroup -g 1000 tacklehunger && \
     adduser -D -s /bin/bash -u 1000 -G tacklehunger tacklehunger && \
     mkdir -p /home/tacklehunger/.local/bin && \
-    chown -R tacklehunger:tacklehunger /home/tacklehunger
+    chown -R tacklehunger:tacklehunger /home/tacklehunger && \
+    echo "tacklehunger ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Copy requirements first for better layer caching
 COPY requirements.txt .
