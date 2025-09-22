@@ -57,6 +57,7 @@ COPY --chown=tacklehunger:tacklehunger src/ ./src/
 COPY --chown=tacklehunger:tacklehunger tests/ ./tests/
 COPY --chown=tacklehunger:tacklehunger scripts/ ./scripts/
 COPY --chown=tacklehunger:tacklehunger docs/ ./docs/
+COPY --chown=tacklehunger:tacklehunger .devcontainer/ ./.devcontainer/
 COPY --chown=tacklehunger:tacklehunger .env.example .
 COPY --chown=tacklehunger:tacklehunger pytest.ini .
 
