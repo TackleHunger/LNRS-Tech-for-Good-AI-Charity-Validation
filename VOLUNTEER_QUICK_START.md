@@ -54,6 +54,20 @@ python -m pytest
 
 **Benefits**: Direct access to files, familiar local development, faster iteration for some developers.
 
+### Option 3: GitHub Codespaces (Cloud Development)
+
+**Prerequisites**: GitHub account with Codespaces access
+
+```bash
+# 1. Open repository in GitHub
+# 2. Click "Code" → "Codespaces" → "Create codespace on main"
+# 3. Wait for automatic setup (2-3 minutes)
+# 4. Edit .env with your API credentials
+# 5. Run tests: python -m pytest
+```
+
+**Benefits**: Zero local setup, consistent environment, browser-based or VS Code, automatic dependency installation, pre-configured extensions, cloud compute resources.
+
 ## 📋 What You'll Be Working On
 
 **Charity Validation Operations:**
@@ -111,6 +125,31 @@ sites = site_ops.get_sites_for_ai(limit=10)
 # (Your validation logic here)
 ```
 
+### Codespaces Workflow
+
+**Built-in cloud development environment:**
+
+```bash
+# Everything is pre-configured! Just edit and run:
+
+# Work with charity validation
+python -c "
+from src.tackle_hunger.graphql_client import TackleHungerClient
+from src.tackle_hunger.site_operations import SiteOperations
+
+client = TackleHungerClient()
+site_ops = SiteOperations(client)
+sites = site_ops.get_sites_for_ai(limit=10)
+print(f'Found {len(sites)} sites for validation')
+"
+
+# Run tests
+python -m pytest
+
+# Interactive development
+python  # Access to full Python REPL
+```
+
 ## 🔒 Security & API Keys
 
 - **Security-optimized Docker environment** - Uses Alpine Linux with minimal vulnerabilities (only 2 low-severity)
@@ -125,6 +164,13 @@ sites = site_ops.get_sites_for_ai(limit=10)
 - **Setup problems:** See `docs/docker-setup.md`
 - **Container won't start:** `docker-compose logs tackle-hunger-dev`
 - **Environment variables:** `docker exec -it tackle-hunger-charity-validation cat /app/.env`
+
+### Codespaces Issues
+
+- **Codespace won't start:** Check GitHub Codespaces status page
+- **Environment setup failed:** Re-run post-create script: `.devcontainer/post-create.sh`
+- **Extension issues:** Reload window (Ctrl+Shift+P → "Developer: Reload Window")
+- **Port forwarding:** Check "Ports" tab in VS Code terminal panel
 
 ### General Issues
 
@@ -166,6 +212,25 @@ python -m pytest
 python scripts/test_connectivity.py
 ```
 
+### Codespaces Commands
+
+```bash
+# Run tests
+python -m pytest
+
+# Test connectivity
+python scripts/test_connectivity.py
+
+# Format code
+python -m black src/ tests/
+
+# Lint code
+python -m flake8 src/ tests/
+
+# Interactive Python
+python
+```
+
 ## 📊 Impact
 
 Your work helps ensure accurate charity information reaches people who need food assistance. Every validated charity site helps connect families with resources!
@@ -175,7 +240,8 @@ Your work helps ensure accurate charity information reaches people who need food
 **Choose your setup method:**
 
 - **New to development or want consistency?** → Use Docker setup
-- **Prefer local development?** → Use Python setup
-- **Want to try both?** → Start with Docker, switch to local later
+- **Prefer local development?** → Use Python setup  
+- **Want zero setup and cloud development?** → Use GitHub Codespaces
+- **Want to try multiple approaches?** → Start with Codespaces, then try others
 
-**Both methods give you the same powerful development environment for charity validation work!**
+**All three methods give you the same powerful development environment for charity validation work!**
