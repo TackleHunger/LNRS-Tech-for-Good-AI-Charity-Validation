@@ -1,9 +1,7 @@
 {
 	"name": "Tackle Hunger Charity Validation",
-	"build": {
-		"context": "..",
-		"dockerfile": ".devcontainer/Dockerfile"
-	},
+	"dockerfile": "Dockerfile",
+	"context": "..",
 	"workspaceFolder": "/workspace",
 	
 	"customizations": {

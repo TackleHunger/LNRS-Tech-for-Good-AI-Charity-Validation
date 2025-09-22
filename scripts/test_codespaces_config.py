@@ -27,9 +27,14 @@ def test_devcontainer_json():
         if field not in config:
             raise ValueError(f"Missing required field: {field}")
     
-    # Check that we have either dockerfile or build configuration
-    if "dockerfile" not in config and "build" not in config:
-        raise ValueError("Missing dockerfile or build configuration")
+    # Check that we have dockerfile configuration (allowing multiple approaches)
+    has_dockerfile_config = (
+        "dockerfile" in config or 
+        "build" in config or 
+        "image" in config
+    )
+    if not has_dockerfile_config:
+        raise ValueError("Missing dockerfile, build, or image configuration")
     
     # If build is present, check its structure
     if "build" in config:
