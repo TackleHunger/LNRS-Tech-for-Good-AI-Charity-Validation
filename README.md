@@ -4,9 +4,13 @@ LexisNexis Risk Solutions (LNRS)'s "Tech for Good" Tackle Hunger AI Charity Vali
 
 ## Quick Start
 
-**Security-Optimized Development Environment**: Uses Alpine Linux Docker containers with 96% fewer vulnerabilities than standard setups.
+**Three Development Environment Options:**
 
-See [VOLUNTEER_QUICK_START.md](VOLUNTEER_QUICK_START.md) for complete setup instructions.
+1. **GitHub Codespaces** - Zero setup, instant cloud environment ([Guide](docs/codespaces-setup.md))
+2. **Docker** - Security-optimized containers with 96% fewer vulnerabilities ([Guide](docs/docker-setup.md))  
+3. **Local Python** - Direct local development ([Guide](VOLUNTEER_QUICK_START.md))
+
+See [VOLUNTEER_QUICK_START.md](VOLUNTEER_QUICK_START.md) for complete setup instructions for all options.
 
 ## Table of Contents
 
