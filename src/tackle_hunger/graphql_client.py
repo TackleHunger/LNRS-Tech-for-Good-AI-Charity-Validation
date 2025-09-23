@@ -10,31 +10,29 @@ import requests
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 from pydantic_settings import BaseSettings
-from pydantic import ConfigDict
 
 
 class TackleHungerConfig(BaseSettings):
     """Configuration for Tackle Hunger API client."""
 
-    ai_scraping_token: str = "dummy_token_for_testing"
+    ai_scraping_token: str
     environment: str = "dev"
     tkh_graphql_endpoint: str = os.getenv("TKH_GRAPHQL_API_URL", "https://devapi.sboc.us/graphql")
     production_endpoint: str = "https://api.sboc.us/graphql"
-    staging_endpoint: str = "https://stagingapi.sboc.us/graphql"
     timeout: int = 30
     rate_limit: int = 10
 
-    model_config = ConfigDict(env_file=".env")
+    class Config:
+        env_file = ".env"
 
     @property
     def graphql_endpoint(self) -> str:
         """Get the appropriate GraphQL endpoint based on environment."""
-        if self.environment == "production":
-            return self.production_endpoint
-        elif self.environment == "staging":
-            return self.staging_endpoint
-        else:
-            return self.tkh_graphql_endpoint
+        return (
+            self.production_endpoint
+            if self.environment == "production"
+            else self.tkh_graphql_endpoint
+        )
 
 
 class TackleHungerClient:
