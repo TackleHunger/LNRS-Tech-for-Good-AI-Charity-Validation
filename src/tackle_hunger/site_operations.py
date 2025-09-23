@@ -41,6 +41,50 @@ class SiteOperations:
         result = self.client.execute_query(query, {"limit": limit})
         return result.get("sitesForAI", [])
 
+    def get_site_for_ai(self, site_id: int) -> Optional[Dict[str, Any]]:
+        """Fetch a single site for AI processing by site ID."""
+        query = '''
+        query GetSiteForAI($siteId: ID!) {
+            siteForAI(siteId: $siteId) {
+                id
+                organizationId
+                name
+                streetAddress
+                city
+                state
+                zip
+                publicEmail
+                publicPhone
+                website
+                description
+                serviceArea
+                acceptsFoodDonations
+                status
+                ein
+            }
+        }
+        '''
+
+        result = self.client.execute_query(query, {"siteId": str(site_id)})
+        return result.get("siteForAI")
+
+    def get_site_name_for_ai(self, site_id: int) -> Optional[str]:
+        """Fetch just the name of a single site for AI processing by site ID.
+        
+        Executes the exact query requested: query { siteForAI(siteId: 455) { name } }
+        """
+        query = '''
+        query GetSiteNameForAI($siteId: ID!) {
+            siteForAI(siteId: $siteId) {
+                name
+            }
+        }
+        '''
+
+        result = self.client.execute_query(query, {"siteId": str(site_id)})
+        site_data = result.get("siteForAI")
+        return site_data.get("name") if site_data else None
+
     def create_site(self, site_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new charity site."""
         mutation = '''
