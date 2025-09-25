@@ -18,7 +18,7 @@ echo "ENVIRONMENT=dev" >> .env
 python -c "from src.tackle_hunger.graphql_client import TackleHungerClient; print('✅ Ready!')"
 
 # 4. Run tests (optional):
-./run_tests.sh
+python -m pytest tests/
 
 # 5. Start validating charities:
 ```
