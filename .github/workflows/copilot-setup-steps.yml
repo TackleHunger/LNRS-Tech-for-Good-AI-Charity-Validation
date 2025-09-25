@@ -89,7 +89,7 @@ jobs:
           # Copy this file to .env and fill in the actual values from GitHub secrets
 
           # GraphQL API Endpoints
-          TKH_GRAPHQL_API_URL=https://devapi.sboc.us/graphql
+          AI_SCRAPING_GRAPHQL_URL=https://devapi.sboc.us/graphql
 
           # API Authentication
           AI_SCRAPING_TOKEN=your_ai_scraping_token_here
@@ -151,7 +151,7 @@ jobs:
 
               ai_scraping_token: str
               environment: str = "dev"
-              tkh_graphql_endpoint: str = os.getenv("TKH_GRAPHQL_API_URL", "https://devapi.sboc.us/graphql")
+              tkh_graphql_endpoint: str = os.getenv("AI_SCRAPING_GRAPHQL_URL", "https://devapi.sboc.us/graphql")
               timeout: int = 30
               rate_limit: int = 10
 
@@ -370,7 +370,7 @@ jobs:
               """Validate that required environment variables are set."""
               required_vars = [
                   "AI_SCRAPING_TOKEN",
-                  "TKH_GRAPHQL_API_URL"
+                  "AI_SCRAPING_GRAPHQL_URL"
               ]
 
               missing_vars = []
