@@ -6,7 +6,7 @@ Welcome! You're helping ensure people in need can find accurate information abou
 
 1. **Install dependencies:**
    ```bash
-   pip install requests gql[requests] python-dotenv pytest
+   pip install -r requirements.txt
    ```
 
 2. **Get your API token:**
