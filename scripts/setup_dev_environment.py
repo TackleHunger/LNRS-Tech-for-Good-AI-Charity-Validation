@@ -15,14 +15,19 @@ def main():
     print("🚀 Setting up Tackle Hunger (SIMPLIFIED VERSION)...")
     print("=" * 50)
     
-    # Install minimal dependencies
-    print("📦 Installing core dependencies...")
+    # Install dependencies from requirements.txt
+    print("📦 Installing core dependencies from requirements.txt...")
+    requirements_file = Path(__file__).parent.parent / "requirements.txt"
+    
+    if not requirements_file.exists():
+        print(f"❌ requirements.txt not found at {requirements_file}")
+        return False
+        
     try:
         subprocess.check_call([
-            sys.executable, "-m", "pip", "install", 
-            "requests", "gql[requests]", "python-dotenv", "pytest"
+            sys.executable, "-m", "pip", "install", "-r", str(requirements_file)
         ])
-        print("✅ Installed: requests, gql, python-dotenv, pytest")
+        print("✅ Installed all dependencies from requirements.txt")
     except Exception as e:
         print(f"❌ Error installing dependencies: {e}")
         return False
@@ -60,7 +65,7 @@ ENVIRONMENT=dev
     print("\nNext steps:")
     print("1. 📝 Edit .env and add your API token from team lead")  
     print("2. 📚 Read: HOW_TO_VALIDATE_CHARITIES.md")
-    print("3. 🧪 Test: python -m pytest tests/")
+    print("3. 🧪 Test: ./run_tests.sh")
     print("4. 🎯 Start validating charities and making a difference!")
 
 if __name__ == "__main__":
