@@ -12,7 +12,20 @@ from gql.transport.requests import RequestsHTTPTransport
 
 
 class TackleHungerConfig:
-    """Simple configuration class - no validation complexity."""
+    """
+    Configuration class for Tackle Hunger API client with environment-based settings.
+
+    Loads API tokens, environment, timeout, and endpoint URLs from environment variables or constructor arguments.
+
+    Attributes:
+        ai_scraping_token (str): API token for authentication.
+        environment (str): Current environment ('production', 'staging', 'dev').
+        timeout (int): Timeout for API requests in seconds.
+        endpoints (dict): Mapping of environment names to GraphQL endpoint URLs.
+
+    Property:
+        graphql_endpoint (str): Returns the GraphQL endpoint URL for the current environment.
+    """
     
     def __init__(self, 
                  ai_scraping_token: Optional[str] = None,
