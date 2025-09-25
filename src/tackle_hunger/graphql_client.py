@@ -24,7 +24,7 @@ class TackleHungerConfig(BaseSettings):
     timeout: int = 30
     rate_limit: int = 10
 
-    model_config = ConfigDict(env_file=".env")
+    model_config = ConfigDict(env_file=".env", extra="ignore")
 
     @property
     def graphql_endpoint(self) -> str:
@@ -54,7 +54,7 @@ class TackleHungerClient:
             timeout=self.config.timeout,
         )
 
-        return Client(transport=transport, fetch_schema_from_transport=True)
+        return Client(transport=transport, fetch_schema_from_transport=False)
 
     def execute_query(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute a GraphQL query."""
