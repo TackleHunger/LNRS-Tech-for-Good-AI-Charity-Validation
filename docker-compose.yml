@@ -3,12 +3,11 @@
 # This provides an easy way to run the complete development environment
 # with proper environment variable management and volume mounting.
 
-version: '3.8'
-
 services:
   tackle-hunger-dev:
     build: .
     container_name: tackle-hunger-charity-validation
+    restart: unless-stopped
     volumes:
       # Mount source code for live development
       - ./src:/app/src
@@ -29,9 +28,9 @@ services:
     command: >
       sh -c "
         echo 'Starting Tackle Hunger development environment...' &&
-        python scripts/test_connectivity.py &&
-        echo 'Environment ready! Run: docker exec -it tackle-hunger-charity-validation bash' &&
-        tail -f /dev/null
+        python scripts/test_connectivity.py || true &&
+        echo 'Environment ready! Run: docker exec -it tackle-hunger-charity-validation sh' &&
+        exec tail -f /dev/null
       "
     # Enable TTY for interactive use
     tty: true
@@ -48,7 +47,7 @@ services:
     environment:
       - ENVIRONMENT=dev
       - PYTHONPATH=/app/src
-    command: ['python', '-m', 'pytest', '-v']
+    command: ['python', '-m', 'pytest', 'tests/', '-v', '--tb=short']
     profiles: ['testing']
 
 networks:

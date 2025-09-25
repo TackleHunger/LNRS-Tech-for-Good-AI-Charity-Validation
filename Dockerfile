@@ -48,6 +48,9 @@ COPY --chown=tacklehunger:tacklehunger pytest.ini .
 # Create .env from example if it doesn't exist
 RUN if [ ! -f .env ]; then cp .env.example .env && chown tacklehunger:tacklehunger .env; fi
 
+# Create pytest cache directory with proper permissions
+RUN mkdir -p /app/.pytest_cache && chown tacklehunger:tacklehunger /app/.pytest_cache
+
 # Switch to non-root user
 USER tacklehunger
 

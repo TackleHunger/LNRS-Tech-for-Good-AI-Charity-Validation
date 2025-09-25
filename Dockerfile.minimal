@@ -47,4 +47,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python3 -c "import sys; print('Container healthy')" || exit 1
 
 # Default command shows the environment is ready
-CMD ["python3", "-c", "print('Tackle Hunger Docker environment ready!'); print('Install requirements: pip install requests pydantic python-dotenv pytest'); print('Run tests: python -m pytest')"]
+CMD ["python3", "-c", "print('Tackle Hunger Docker environment ready!'); print('Install requirements: pip install -r requirements.txt'); print('Run tests: python -m pytest')"]

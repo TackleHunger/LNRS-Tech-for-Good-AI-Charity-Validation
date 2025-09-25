@@ -94,8 +94,8 @@ print(f'Found {len(sites)} sites for validation')
 
 ### Python Packages
 
-- **Core Dependencies**: All packages from `requirements.txt`
-- **Additional Tools**: `pydantic-settings`, `ipython`, `jupyter`
+- **Core Dependencies**: All packages from `requirements.txt` (requests, gql, python-dotenv, pytest, black)
+- **Additional Tools**: `ipython`, `jupyter`
 - **Development Tools**: `black`, `flake8`, `mypy`, `pytest`
 
 ### System Tools
@@ -157,7 +157,6 @@ echo $PYTHONPATH
 
 # Reinstall dependencies
 pip install -r requirements.txt
-pip install pydantic-settings
 ```
 
 **4. API connectivity issues:**

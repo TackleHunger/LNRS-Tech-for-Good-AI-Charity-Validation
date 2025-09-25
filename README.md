@@ -7,8 +7,8 @@
 **Ready to help in 5 minutes:**
 
 ```bash
-# 1. Install dependencies (just 4 packages!)
-pip install requests gql[requests] python-dotenv pytest
+# 1. **Install dependencies:**
+pip install -r requirements.txt
 
 # 2. Get API token from team lead, create .env file:
 echo "AI_SCRAPING_TOKEN=your_token_here" > .env
@@ -17,7 +17,10 @@ echo "ENVIRONMENT=dev" >> .env
 # 3. Test it works:
 python -c "from src.tackle_hunger.graphql_client import TackleHungerClient; print('✅ Ready!')"
 
-# 4. Start validating charities:
+# 4. Run tests (optional):
+./run_tests.sh
+
+# 5. Start validating charities:
 ```
 
 **📋 Read the [How to Validate Charities Guide](HOW_TO_VALIDATE_CHARITIES.md) - everything you need to know!**

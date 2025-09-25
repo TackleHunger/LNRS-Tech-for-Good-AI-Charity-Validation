@@ -52,7 +52,7 @@ COPY requirements.txt .
 # Install Python dependencies with additional development packages for Codespaces
 RUN python3 -m pip install --upgrade pip setuptools wheel && \
     python3 -m pip install -r requirements.txt && \
-    python3 -m pip install pydantic-settings ipython jupyter && \
+    python3 -m pip install ipython jupyter && \
     python3 -m pip check
 
 # Copy project files with proper ownership
