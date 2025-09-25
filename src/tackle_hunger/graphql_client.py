@@ -30,7 +30,11 @@ class TackleHungerConfig:
         self.environment = environment or os.getenv("ENVIRONMENT", "dev")
         
         # Simple defaults - no validation needed for volunteer work
-        self.timeout = int(os.getenv("API_TIMEOUT", "30"))
+        timeout_str = os.getenv("API_TIMEOUT", "30")
+        try:
+            self.timeout = int(timeout_str)
+        except (ValueError, TypeError):
+            self.timeout = 30
         
         # Endpoint URLs - clear and simple
         self.endpoints = {
