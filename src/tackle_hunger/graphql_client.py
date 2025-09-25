@@ -10,14 +10,6 @@ from typing import Optional, Dict, Any
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 
-# Load environment variables if .env file exists
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    # dotenv is optional - fallback to os.getenv
-    pass
-
 
 class TackleHungerConfig:
     """Simple configuration class - no validation complexity."""
@@ -25,6 +17,14 @@ class TackleHungerConfig:
     def __init__(self, 
                  ai_scraping_token: Optional[str] = None,
                  environment: Optional[str] = None):
+        # Load environment variables if .env file exists
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            # dotenv is optional - fallback to os.getenv
+            pass
+        
         # Allow override via constructor or fall back to environment
         self.ai_scraping_token = ai_scraping_token or os.getenv("AI_SCRAPING_TOKEN", "dummy_token_for_testing")
         self.environment = environment or os.getenv("ENVIRONMENT", "dev")
