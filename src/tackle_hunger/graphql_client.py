@@ -1,8 +1,7 @@
 """
-Simplified GraphQL Client for Tackle Hunger API
+GraphQL Client for Tackle Hunger API
 
-Easy-to-understand GraphQL operations for charity validation volunteers.
-No Pydantic complexity - just simple Python that works.
+GraphQL operations for charity validation volunteers.
 """
 
 import os
@@ -63,7 +62,7 @@ class TackleHungerConfig:
 
 
 class TackleHungerClient:
-    """Simple GraphQL client for charity validation - no Pydantic complexity."""
+    """GraphQL client for charity validation"""
 
     def __init__(self, config: Optional[TackleHungerConfig] = None):
         self.config = config or TackleHungerConfig()

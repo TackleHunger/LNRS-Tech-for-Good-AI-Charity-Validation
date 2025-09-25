@@ -1,5 +1,5 @@
 """
-Tests for simplified GraphQL client - easy for volunteers to understand.
+Tests for GraphQL client
 """
 
 import pytest
@@ -7,7 +7,7 @@ from src.tackle_hunger.graphql_client import TackleHungerConfig, TackleHungerCli
 
 
 def test_config_defaults():
-    """Test simple configuration defaults."""
+    """Test configuration defaults."""
     config = TackleHungerConfig(ai_scraping_token="test")
     assert config.environment == "dev"
     assert config.timeout == 30
