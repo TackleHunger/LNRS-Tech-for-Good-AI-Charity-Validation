@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-SIMPLE setup script for Tackle Hunger volunteers.
-No complexity - just get volunteers started quickly.
+Setup script for Tackle Hunger volunteers.
 """
 
 import os
@@ -11,8 +10,8 @@ from pathlib import Path
 
 
 def main():
-    """Simple setup for volunteers."""
-    print("🚀 Setting up Tackle Hunger (SIMPLIFIED VERSION)...")
+    """Setup for volunteers."""
+    print("🚀 Setting up Tackle Hunger...")
     print("=" * 50)
     
     # Install dependencies from requirements.txt
@@ -32,16 +31,16 @@ def main():
         print(f"❌ Error installing dependencies: {e}")
         return False
     
-    # Create simple .env if it doesn't exist
+    # Create .env if it doesn't exist
     env_file = Path(".env")
     if not env_file.exists():
-        env_content = """# SIMPLE .env Configuration for Volunteers
+        env_content = """# .env Configuration for Volunteers
 AI_SCRAPING_TOKEN=your_ai_scraping_token_here
 AI_SCRAPING_GRAPHQL_URL=https://devapi.sboc.us/graphql
 ENVIRONMENT=dev
 """
         env_file.write_text(env_content)
-        print("✅ Created simple .env file")
+        print("✅ Created .env file")
     else:
         print("✅ .env file already exists")
     

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple connectivity test for Tackle Hunger volunteers.
+Connectivity test for Tackle Hunger volunteers.
 Tests that you can reach the API and basic internet resources.
 """
 
@@ -48,7 +48,7 @@ def test_graphql_endpoint(url: str, name: str) -> bool:
 
 
 def main():
-    """Run simple connectivity tests."""
+    """Run connectivity tests."""
     print("🌐 Testing connectivity for Tackle Hunger...")
     print("=" * 40)
 
