@@ -174,3 +174,6 @@ env/
 
 # Docker
 docker-compose.override.yml
+
+# Generated CSV exports
+sites_for_ai_*.csv
