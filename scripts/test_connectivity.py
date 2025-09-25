@@ -1,72 +1,58 @@
 #!/usr/bin/env python3
 """
-Connectivity test script for Tackle Hunger development environment.
-
-Tests network access to required APIs and services.
+Simple connectivity test for Tackle Hunger volunteers.
+Tests that you can reach the API and basic internet resources.
 """
 
 import requests
 import sys
-from urllib.parse import urlparse
 
 
-REQUIRED_ENDPOINTS = [
-    "https://devapi.sboc.us/graphql",
-    "https://pypi.org/simple/requests/",
-    "https://github.com",
-    "https://api.github.com"
-]
-
-
-def test_endpoint(url: str, timeout: int = 10) -> bool:
-    """Test connectivity to a single endpoint."""
+def test_endpoint(url: str, name: str) -> bool:
+    """Test connectivity to an endpoint."""
     try:
-        parsed = urlparse(url)
-        host = parsed.netloc
-
-        print(f"Testing {host}...", end=" ")
-
-        response = requests.get(url, timeout=timeout, allow_redirects=True)
-
+        print(f"Testing {name}...", end=" ")
+        response = requests.get(url, timeout=10)
+        
         if response.status_code < 400:
-            print("✓ OK")
+            print("✅ OK")
             return True
         else:
-            print(f"⚠ HTTP {response.status_code}")
+            print(f"⚠️ HTTP {response.status_code}")
             return False
-
-    except requests.exceptions.Timeout:
-        print("⚠ Timeout")
-        return False
-    except requests.exceptions.ConnectionError:
-        print("✗ Connection Error")
-        return False
+            
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"❌ Failed: {str(e)[:50]}...")
         return False
 
 
 def main():
-    """Run connectivity tests."""
-    print("Testing connectivity to required endpoints...")
-    print("=" * 50)
+    """Run simple connectivity tests."""
+    print("🌐 Testing connectivity for Tackle Hunger...")
+    print("=" * 40)
 
-    success_count = 0
-    total_count = len(REQUIRED_ENDPOINTS)
+    # Core endpoints volunteers need
+    tests = [
+        ("https://devapi.sboc.us/graphql", "Tackle Hunger Dev API"),
+        ("https://pypi.org/simple/requests/", "Python Package Index"),
+        ("https://github.com", "GitHub")
+    ]
 
-    for endpoint in REQUIRED_ENDPOINTS:
-        if test_endpoint(endpoint):
-            success_count += 1
+    passed = 0
+    for url, name in tests:
+        if test_endpoint(url, name):
+            passed += 1
 
-    print("=" * 50)
-    print(f"Results: {success_count}/{total_count} endpoints accessible")
+    print("=" * 40)
+    print(f"Results: {passed}/{len(tests)} tests passed")
 
-    if success_count == total_count:
-        print("✓ All connectivity tests passed!")
+    if passed == len(tests):
+        print("🎉 All connectivity tests passed!")
+        print("You're ready to validate charities!")
         sys.exit(0)
     else:
-        print("⚠ Some endpoints are not accessible.")
-        print("Please check your firewall configuration or network settings.")
+        print("⚠️ Some tests failed. Check your network connection.")
+        print("Ask your team lead if you need help with firewall settings.")
         sys.exit(1)
 
 

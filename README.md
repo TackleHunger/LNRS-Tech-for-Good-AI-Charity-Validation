@@ -1,16 +1,97 @@
-# LNRS-Tech-for-Good-AI-Charity-Validation
+# Tackle Hunger Charity Validation
 
-LexisNexis Risk Solutions (LNRS)'s "Tech for Good" Tackle Hunger AI Charity Validation project.
+**Simple charity validation for volunteers** - Help families find food assistance by keeping charity information accurate and up-to-date.
 
-## Quick Start
+## ⚡ Quick Start for Volunteers
 
-**Three Development Environment Options:**
+**Ready to help in 5 minutes:**
 
-1. **GitHub Codespaces** - Zero setup, instant cloud environment ([Guide](docs/codespaces-setup.md))
-2. **Docker** - Security-optimized containers with 96% fewer vulnerabilities ([Guide](docs/docker-setup.md))  
-3. **Local Python** - Direct local development ([Guide](VOLUNTEER_QUICK_START.md))
+```bash
+# 1. Install dependencies (just 4 packages!)
+pip install requests gql[requests] python-dotenv pytest
 
-See [VOLUNTEER_QUICK_START.md](VOLUNTEER_QUICK_START.md) for complete setup instructions for all options.
+# 2. Get API token from team lead, create .env file:
+echo "AI_SCRAPING_TOKEN=your_token_here" > .env
+echo "ENVIRONMENT=dev" >> .env
+
+# 3. Test it works:
+python -c "from src.tackle_hunger.graphql_client import TackleHungerClient; print('✅ Ready!')"
+
+# 4. Start validating charities:
+```
+
+**📋 Read the [How to Validate Charities Guide](HOW_TO_VALIDATE_CHARITIES.md) - everything you need to know!**
+
+## 🎯 What You'll Do
+
+**Charity Validation Tasks:**
+- ✅ Verify charity addresses, phone numbers, websites  
+- ✅ Update missing or incorrect information
+- ✅ Add new charities to help more families
+- ✅ Ensure data quality for food distribution network
+
+**Impact:** Your work helps hungry families find food assistance faster!
+
+## 🚀 Example: Validate a Charity
+
+```python
+from src.tackle_hunger.graphql_client import TackleHungerClient
+from src.tackle_hunger.site_operations import SiteOperations
+
+# Connect and get charities needing validation
+client = TackleHungerClient()
+site_ops = SiteOperations(client)
+charities = site_ops.get_sites_for_ai(limit=5)
+
+# Update charity information
+updated_info = {
+    "publicPhone": "555-123-4567",  # Corrected phone
+    "website": "https://correctwebsite.org",
+    "modifiedBy": "AI_Copilot_Assistant"  # Always include this
+}
+result = site_ops.update_site(charities[0]['id'], updated_info)
+print("✅ Charity updated!")
+```
+
+## 🛠 Development Options
+
+**Choose your preferred setup:**
+
+1. **Local Python** (Simplest) - Follow quick start above
+2. **GitHub Codespaces** - Cloud development environment ([Guide](docs/codespaces-setup.md))  
+3. **Docker** - Containerized environment ([Guide](docs/docker-setup.md))
+
+## 📊 Project Goals
+
+**Target Deliverables:**
+1. **Update Missing Info** - Fill in blank charity details
+2. **Verify Current Data** - Check addresses, phones, websites work
+3. **Add New Charities** - Expand the network to help more families
+4. **Ensure Data Quality** - Mark reliable sources, validate information
+
+## 🔒 Important Notes
+
+- **Never commit API keys** - they're in `.env` (git-ignored)
+- **Use dev environment** for testing your changes
+- **Always include** `modifiedBy: "AI_Copilot_Assistant"` when updating
+- **Test your changes** with `python -m pytest tests/`
+
+## 🆘 Need Help?
+
+- **Getting Started**: [How to Validate Charities Guide](HOW_TO_VALIDATE_CHARITIES.md)
+- **API Reference**: GraphQL playground at https://devapi.sboc.us/graphql  
+- **Network Issues**: [Firewall Setup Guide](docs/firewall-setup.md)
+- **Questions**: Ask in the project channel
+
+## 📈 This Project Uses
+
+- **Language**: Python 3.13
+- **API**: GraphQL for charity data operations
+- **Focus**: Simple, volunteer-friendly code - no enterprise complexity!
+
+---
+
+**🎯 Ready to make a difference? Start with the [How to Validate Charities Guide](HOW_TO_VALIDATE_CHARITIES.md)!**
 
 ## Table of Contents
 
