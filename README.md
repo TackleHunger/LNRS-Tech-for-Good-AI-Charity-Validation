@@ -35,27 +35,6 @@ python -m pytest tests/
 
 **Impact:** Your work helps hungry families find food assistance faster!
 
-## 🚀 Example: Validate a Charity
-
-```python
-from src.tackle_hunger.graphql_client import TackleHungerClient
-from src.tackle_hunger.site_operations import SiteOperations
-
-# Connect and get charities needing validation
-client = TackleHungerClient()
-site_ops = SiteOperations(client)
-charities = site_ops.get_sites_for_ai(limit=5)
-
-# Update charity information
-updated_info = {
-    "publicPhone": "555-123-4567",  # Corrected phone
-    "website": "https://correctwebsite.org",
-    "modifiedBy": "AI_Copilot_Assistant"  # Always include this
-}
-result = site_ops.update_site(charities[0]['id'], updated_info)
-print("✅ Charity updated!")
-```
-
 ## 🛠 Development Options
 
 **Choose your preferred setup:**
