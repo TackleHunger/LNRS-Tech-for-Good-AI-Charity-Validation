@@ -52,7 +52,7 @@ The Codespace will automatically:
    python scripts/test_connectivity.py
    
    # Run tests
-   python -m pytest
+   python -m pytest tests/
    ```
 
 ### 3. Development Workflow
