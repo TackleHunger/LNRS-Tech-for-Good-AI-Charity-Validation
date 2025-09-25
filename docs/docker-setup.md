@@ -44,7 +44,7 @@ docker-compose up -d
 docker exec -it tackle-hunger-charity-validation sh
 
 # Inside container, run tests
-python -m pytest
+python -m pytest tests/
 
 # Or run connectivity tests
 python scripts/test_connectivity.py
@@ -56,8 +56,6 @@ python scripts/test_connectivity.py
 # Run tests using the test profile
 docker-compose --profile testing up test-runner
 
-# Or use the test runner script
-./run_tests.sh
 ```
 
 ### 3. Development Workflow
@@ -140,18 +138,7 @@ docker-compose build
 
 **Consistent testing across environments:**
 
-Use the included `run_tests.sh` script for consistent test execution:
-
-```bash
-# Works in both Docker and local environments
-./run_tests.sh
-```
-
-```bash
-# Run tests (recommended way)
-./run_tests.sh
-
-# Or run tests manually
+# Run tests manually
 docker exec -it tackle-hunger-charity-validation python -m pytest tests/ -v
 
 # Run connectivity tests
