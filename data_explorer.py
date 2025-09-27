@@ -425,9 +425,10 @@ def load_data():
         site_ops = SiteOperations(client)
         org_ops = OrganizationOperations(client)
         
-        # Load sites and organizations
-        sites = site_ops.get_sites_for_ai(minimal=False)
-        organizations = org_ops.get_organizations_for_ai(minimal=False)
+        # Load all sites and organizations using the new pagination methods
+        # For the data explorer, we'll load all data at once for complete analysis
+        sites = site_ops.get_all_sites_for_ai(per_page=10, minimal=False)
+        organizations = org_ops.get_all_organizations_for_ai(per_page=10, minimal=False)
         
         return sites, organizations
     except Exception as e:
@@ -436,6 +437,34 @@ def load_data():
         
         # Return sample data
         return get_sample_data()
+
+
+def load_paginated_data(data_type: str = "sites", page: int = 1, per_page: int = 10):
+    """Load paginated data for display with pagination controls."""
+    try:
+        client = TackleHungerClient()
+        
+        if data_type == "sites":
+            site_ops = SiteOperations(client)
+            result = site_ops.get_sites_for_ai(page=page, per_page=per_page, minimal=False)
+        else:  # organizations
+            org_ops = OrganizationOperations(client)
+            result = org_ops.get_organizations_for_ai(page=page, per_page=per_page, minimal=False)
+        
+        return result
+    except Exception as e:
+        st.error(f"Failed to load paginated data from API: {str(e)}")
+        # Return a paginated structure with sample data
+        sample_sites, sample_orgs = get_sample_data()
+        sample_data = sample_sites if data_type == "sites" else sample_orgs
+        
+        return {
+            "data": sample_data,
+            "page": 1,
+            "per_page": len(sample_data),
+            "total_pages": 1,
+            "total_count": len(sample_data)
+        }
 
 
 def get_sample_data():
@@ -856,6 +885,144 @@ def display_data_tables(sites: List[Dict[str, Any]], organizations: List[Dict[st
             st.info("No organizations data available")
 
 
+def display_paginated_data():
+    """Display data with pagination controls (10 items per page as requested)."""
+    st.subheader("📄 Paginated Data Viewer")
+    st.info("This view loads data in pages of 10 items as requested, ideal for large datasets.")
+    
+    # Data type selector
+    data_type = st.radio("Select data type:", ["Sites", "Organizations"], horizontal=True)
+    data_key = data_type.lower().rstrip('s') if data_type == "Organizations" else data_type.lower()
+    
+    # Initialize session state for pagination
+    if f"page_{data_key}" not in st.session_state:
+        st.session_state[f"page_{data_key}"] = 1
+    
+    # Load paginated data
+    with st.spinner(f"Loading {data_type.lower()} page {st.session_state[f'page_{data_key}']}..."):
+        result = load_paginated_data(data_key, page=st.session_state[f"page_{data_key}"], per_page=10)
+    
+    data = result["data"]
+    page = result["page"]
+    per_page = result["per_page"]
+    total_pages = result["total_pages"]
+    total_count = result["total_count"]
+    
+    # Display pagination info
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Items", total_count)
+    with col2:
+        st.metric("Current Page", f"{page} of {total_pages}")
+    with col3:
+        st.metric("Items on Page", len(data))
+    
+    # Pagination controls
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        if st.button("⏮️ First", disabled=page <= 1):
+            st.session_state[f"page_{data_key}"] = 1
+            st.rerun()
+    
+    with col2:
+        if st.button("⏪ Previous", disabled=page <= 1):
+            st.session_state[f"page_{data_key}"] = page - 1
+            st.rerun()
+    
+    with col3:
+        # Page selector
+        new_page = st.selectbox("Go to page:", 
+                               options=list(range(1, total_pages + 1)),
+                               index=page - 1,
+                               key=f"page_selector_{data_key}")
+        if new_page != page:
+            st.session_state[f"page_{data_key}"] = new_page
+            st.rerun()
+    
+    with col4:
+        if st.button("Next ⏩", disabled=page >= total_pages):
+            st.session_state[f"page_{data_key}"] = page + 1
+            st.rerun()
+    
+    with col5:
+        if st.button("Last ⏭️", disabled=page >= total_pages):
+            st.session_state[f"page_{data_key}"] = total_pages
+            st.rerun()
+    
+    # Display data
+    if data:
+        if data_type == "Sites":
+            display_sites_table(data, f"Sites - Page {page}")
+        else:
+            display_organizations_table(data, f"Organizations - Page {page}")
+    else:
+        st.warning("No data available on this page.")
+
+
+def display_sites_table(sites: List[Dict[str, Any]], title: str):
+    """Display sites in a table format with quality scores."""
+    st.subheader(title)
+    
+    # Calculate quality scores for the sites
+    sites_with_quality = []
+    for site in sites:
+        quality = calculate_site_quality_score(site)
+        site_data = site.copy()
+        site_data['quality_score'] = quality['overall_score']
+        site_data['quality_grade'] = get_quality_grade(quality['overall_score'])
+        site_data['completeness'] = quality['completeness']
+        sites_with_quality.append(site_data)
+    
+    # Create DataFrame
+    df_sites = pd.DataFrame(sites_with_quality)
+    
+    # Display key columns
+    display_columns = ['name', 'city', 'state', 'quality_score', 'quality_grade', 'completeness', 'publicPhone', 'publicEmail', 'website']
+    available_columns = [col for col in display_columns if col in df_sites.columns]
+    
+    st.dataframe(
+        df_sites[available_columns],
+        use_container_width=True,
+        column_config={
+            "quality_score": st.column_config.NumberColumn("Quality Score", format="%.3f"),
+            "completeness": st.column_config.NumberColumn("Completeness", format="%.3f"),
+            "name": st.column_config.TextColumn("Site Name", width="large"),
+        }
+    )
+
+
+def display_organizations_table(organizations: List[Dict[str, Any]], title: str):
+    """Display organizations in a table format with quality scores."""
+    st.subheader(title)
+    
+    # Calculate quality scores for organizations
+    orgs_with_quality = []
+    for org in organizations:
+        quality = calculate_organization_quality_score(org)
+        org_data = org.copy()
+        org_data['quality_score'] = quality['overall_score']
+        org_data['quality_grade'] = get_quality_grade(quality['overall_score'])
+        org_data['site_count'] = len(org.get('sites', []))
+        orgs_with_quality.append(org_data)
+    
+    df_orgs = pd.DataFrame(orgs_with_quality)
+    
+    # Display key columns
+    display_columns = ['name', 'city', 'state', 'quality_score', 'quality_grade', 'site_count', 'publicPhone', 'publicEmail']
+    available_columns = [col for col in display_columns if col in df_orgs.columns]
+    
+    st.dataframe(
+        df_orgs[available_columns],
+        use_container_width=True,
+        column_config={
+            "quality_score": st.column_config.NumberColumn("Quality Score", format="%.3f"),
+            "site_count": st.column_config.NumberColumn("Sites", format="%d"),
+            "name": st.column_config.TextColumn("Organization Name", width="large"),
+        }
+    )
+
+
 def display_quality_analytics(sites: List[Dict[str, Any]], organizations: List[Dict[str, Any]]):
     """Display data quality analytics and visualizations."""
     st.subheader("📈 Data Quality Analytics")
@@ -958,7 +1125,7 @@ def main():
     st.sidebar.title("📋 Navigation")
     page = st.sidebar.radio(
         "Choose a view:",
-        ["Tree Structure", "Data Tables", "Quality Analytics", "Map Visualization", "Network Graph"]
+        ["Tree Structure", "Data Tables", "Paginated Data", "Quality Analytics", "Map Visualization", "Network Graph"]
     )
     
     # Display data summary
@@ -979,7 +1146,9 @@ def main():
     if page == "Tree Structure":
         display_tree_structure(organizations)
     elif page == "Data Tables":
-        display_data_tables(sites, organizations) 
+        display_data_tables(sites, organizations)
+    elif page == "Paginated Data":
+        display_paginated_data()
     elif page == "Quality Analytics":
         display_quality_analytics(sites, organizations)
     elif page == "Map Visualization":

@@ -1,41 +1,68 @@
 """
 GraphQL Client for Tackle Hunger API
 
-Provides authenticated GraphQL operations for charity validation.
+GraphQL operations for charity validation volunteers.
 """
 
 import os
 from typing import Optional, Dict, Any
-import requests
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
-from pydantic_settings import BaseSettings
 
 
-class TackleHungerConfig(BaseSettings):
-    """Configuration for Tackle Hunger API client."""
+class TackleHungerConfig:
+    """
+    Configuration class for Tackle Hunger API client with environment-based settings.
 
-    ai_scraping_token: str
-    environment: str = "dev"
-    tkh_graphql_endpoint: str = os.getenv("AI_SCRAPING_GRAPHQL_URL", "https://devapi.sboc.us/graphql")
-    timeout: int = 30
-    rate_limit: int = 10
+    Loads API tokens, environment, timeout, and endpoint URLs from environment variables or constructor arguments.
 
-    class Config:
-        env_file = ".env"
+    Attributes:
+        ai_scraping_token (str): API token for authentication.
+        environment (str): Current environment ('production', 'staging', 'dev').
+        timeout (int): Timeout for API requests in seconds.
+        endpoints (dict): Mapping of environment names to GraphQL endpoint URLs.
 
+    Property:
+        graphql_endpoint (str): Returns the GraphQL endpoint URL for the current environment.
+    """
+    
+    def __init__(self, 
+                 ai_scraping_token: Optional[str] = None,
+                 environment: Optional[str] = None):
+        # Load environment variables if .env file exists
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            # dotenv is optional - fallback to os.getenv
+            pass
+        
+        # Allow override via constructor or fall back to environment
+        self.ai_scraping_token = ai_scraping_token or os.getenv("AI_SCRAPING_TOKEN", "dummy_token_for_testing")
+        self.environment = environment or os.getenv("ENVIRONMENT", "dev")
+        
+        # Simple defaults - no validation needed for volunteer work
+        timeout_str = os.getenv("API_TIMEOUT", "30")
+        try:
+            self.timeout = int(timeout_str)
+        except (ValueError, TypeError):
+            self.timeout = 30
+        
+        # Endpoint URLs - clear and simple
+        self.endpoints = {
+            "production": "https://api.sboc.us/graphql",
+            "staging": "https://stagingapi.sboc.us/graphql", 
+            "dev": os.getenv("AI_SCRAPING_GRAPHQL_URL", "https://devapi.sboc.us/graphql")
+        }
+    
     @property
     def graphql_endpoint(self) -> str:
-        """Get the appropriate GraphQL endpoint based on environment."""
-        return (
-            self.production_endpoint
-            if self.environment == "production"
-            else self.tkh_graphql_endpoint
-        )
+        """Get the GraphQL endpoint based on environment."""
+        return self.endpoints.get(self.environment, self.endpoints["dev"])
 
 
 class TackleHungerClient:
-    """GraphQL client for Tackle Hunger charity validation operations."""
+    """GraphQL client for charity validation"""
 
     def __init__(self, config: Optional[TackleHungerConfig] = None):
         self.config = config or TackleHungerConfig()
@@ -50,8 +77,7 @@ class TackleHungerClient:
             },
             timeout=self.config.timeout,
         )
-
-        return Client(transport=transport, fetch_schema_from_transport=True)
+        return Client(transport=transport, fetch_schema_from_transport=False)
 
     def execute_query(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute a GraphQL query."""
