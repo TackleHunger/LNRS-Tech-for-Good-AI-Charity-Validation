@@ -1,71 +1,105 @@
 #!/usr/bin/env python3
 """
-Setup script for Tackle Hunger volunteers.
+Development environment setup script for Tackle Hunger volunteers.
+
+This script helps volunteers quickly set up their development environment
+with proper configuration and validation.
 """
 
 import os
-import subprocess
 import sys
+import subprocess
 from pathlib import Path
 
 
-def main():
-    """Setup for volunteers."""
-    print("🚀 Setting up Tackle Hunger...")
-    print("=" * 50)
-    
-    # Install dependencies from requirements.txt
-    print("📦 Installing core dependencies from requirements.txt...")
-    requirements_file = Path(__file__).parent.parent / "requirements.txt"
-    
-    if not requirements_file.exists():
-        print(f"❌ requirements.txt not found at {requirements_file}")
+def check_python_version():
+    """Verify Python 3.13 is being used."""
+    if sys.version_info[:2] != (3, 13):
+        print(f"Warning: Expected Python 3.13, but found {sys.version}")
         return False
-        
+    print("✓ Python 3.13 detected")
+    return True
+
+
+def install_dependencies():
+    """Install required dependencies."""
+    print("Installing Python dependencies...")
     try:
-        subprocess.check_call([
-            sys.executable, "-m", "pip", "install", "-r", str(requirements_file)
-        ])
-        print("✅ Installed all dependencies from requirements.txt")
-    except Exception as e:
-        print(f"❌ Error installing dependencies: {e}")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+        print("✓ Dependencies installed successfully")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Error installing dependencies: {e}")
         return False
-    
-    # Create .env if it doesn't exist
+
+
+def setup_environment_file():
+    """Set up environment configuration file."""
+    env_example = Path(".env.example")
     env_file = Path(".env")
-    if not env_file.exists():
-        env_content = """# .env Configuration for Volunteers
-AI_SCRAPING_TOKEN=your_ai_scraping_token_here
-AI_SCRAPING_GRAPHQL_URL=https://devapi.sboc.us/graphql
-ENVIRONMENT=dev
-"""
-        env_file.write_text(env_content)
-        print("✅ Created .env file")
+
+    if not env_file.exists() and env_example.exists():
+        env_file.write_text(env_example.read_text())
+        print("✓ Created .env file from template")
+        print("Please edit .env file with your actual API credentials")
+        return True
+    elif env_file.exists():
+        print("✓ .env file already exists")
+        return True
     else:
-        print("✅ .env file already exists")
-    
-    # Test basic imports (add src to path for testing)
-    print("🐍 Testing Python imports...")
-    try:
-        # Add src directory to Python path for import testing
-        src_path = Path(__file__).parent.parent / "src"
-        if src_path.exists():
-            sys.path.insert(0, str(src_path))
-        
-        from tackle_hunger.graphql_client import TackleHungerClient
-        from tackle_hunger.site_operations import SiteOperations
-        print("✅ All imports working perfectly")
-    except ImportError:
-        # Don't show scary error - this is normal during setup
-        print("✅ Python modules ready (imports will work when running from project directory)")
-    
+        print("Error: .env.example not found")
+        return False
+
+
+def validate_environment():
+    """Validate that required environment variables are set."""
+    required_vars = [
+        "AI_SCRAPING_TOKEN",
+        "AI_SCRAPING_GRAPHQL_URL"
+    ]
+
+    missing_vars = []
+    for var in required_vars:
+        if not os.getenv(var):
+            missing_vars.append(var)
+
+    if missing_vars:
+        print(f"Warning: Missing environment variables: {', '.join(missing_vars)}")
+        print("Please update your .env file with the required values")
+        return False
+
+    print("✓ All required environment variables are set")
+    return True
+
+
+def main():
+    """Main setup function."""
+    print("Setting up Tackle Hunger development environment...")
     print("=" * 50)
-    print("🎉 Setup complete!")
-    print("\nNext steps:")
-    print("1. 📝 Edit .env and add your API token from team lead")  
-    print("2. 📚 Read: HOW_TO_VALIDATE_CHARITIES.md")
-    print("3. 🧪 Test: ./run_tests.sh")
-    print("4. 🎯 Start validating charities and making a difference!")
+
+    success = True
+    success &= check_python_version()
+    success &= install_dependencies()
+    success &= setup_environment_file()
+
+    # Load environment variables from .env file
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+        success &= validate_environment()
+    except ImportError:
+        print("Note: python-dotenv not available for environment validation")
+
+    print("=" * 50)
+    if success:
+        print("✓ Development environment setup complete!")
+        print("\nNext steps:")
+        print("1. Edit .env file with your actual API credentials")
+        print("2. Run tests: python -m pytest")
+        print("3. Start coding charity validation operations!")
+    else:
+        print("⚠ Setup completed with warnings. Please address the issues above.")
+
 
 if __name__ == "__main__":
     main()
