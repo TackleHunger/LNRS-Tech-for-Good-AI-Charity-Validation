@@ -59,24 +59,44 @@ def set_page_config():
     <style>
     /* Main app background */
     .stApp {
-        background-color: #1E1E1E;
-        color: #FFFFFF;
+        background-color: #1E1E1E !important;
+        color: #FFFFFF !important;
     }
     
     /* Main content area */
     .main > div {
-        background-color: #1E1E1E;
-        color: #FFFFFF;
+        background-color: #1E1E1E !important;
+        color: #FFFFFF !important;
     }
     
-    /* Sidebar */
-    .css-1d391kg {
-        background-color: #2D2D2D;
+    /* Fix specific main container */
+    .main .block-container {
+        background-color: #1E1E1E !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg, .css-1y4p8pa, .sidebar .sidebar-content {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Sidebar elements */
+    .stSidebar {
+        background-color: #2D2D2D !important;
+    }
+    
+    .stSidebar .stMarkdown {
+        color: #FFFFFF !important;
+    }
+    
+    .stSidebar h1, .stSidebar h2, .stSidebar h3 {
+        color: #FFFFFF !important;
     }
     
     /* All text elements */
     .stMarkdown, .stText, .stCaption {
-        color: #FFFFFF;
+        color: #FFFFFF !important;
     }
     
     /* Headers */
@@ -84,53 +104,233 @@ def set_page_config():
         color: #FFFFFF !important;
     }
     
-    /* Selectbox and other inputs */
+    /* Paragraph text */
+    p {
+        color: #FFFFFF !important;
+    }
+    
+    /* Strong/bold text */
+    strong, b {
+        color: #FFFFFF !important;
+    }
+    
+    /* Selectbox and dropdown styling */
     .stSelectbox > div > div {
-        background-color: #2D2D2D;
-        color: #FFFFFF;
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+        border: 1px solid #555 !important;
+    }
+    
+    .stSelectbox label {
+        color: #FFFFFF !important;
+    }
+    
+    /* Selectbox dropdown options */
+    .stSelectbox > div > div > div {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
     }
     
     /* Dataframes */
     .stDataFrame {
-        background-color: #2D2D2D;
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Dataframe content */
+    .stDataFrame table {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+    }
+    
+    .stDataFrame th, .stDataFrame td {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
     }
     
     /* Metric containers */
     .metric-container {
-        background-color: #2D2D2D;
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Metric values and labels */
+    .css-1xarl3l, .css-1wivap2, .css-hxt7ib {
+        color: #FFFFFF !important;
+    }
+    
+    /* Metric value styling */
+    [data-testid="metric-container"] {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+        border: 1px solid #444 !important;
+        border-radius: 4px !important;
+        padding: 10px !important;
+    }
+    
+    [data-testid="metric-container"] > div {
+        color: #FFFFFF !important;
     }
     
     /* Expander */
     .streamlit-expanderHeader {
-        background-color: #2D2D2D;
-        color: #FFFFFF;
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Expander content */
+    .streamlit-expanderContent {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
     }
     
     /* Tabs */
     .stTabs [data-baseweb="tab-list"] {
-        background-color: #2D2D2D;
+        background-color: #2D2D2D !important;
     }
     
     .stTabs [data-baseweb="tab"] {
-        background-color: #2D2D2D;
-        color: #FFFFFF;
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+    }
+    
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background-color: #444 !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Tab panels */
+    [data-baseweb="tab-panel"] {
+        background-color: #1E1E1E !important;
+        color: #FFFFFF !important;
     }
     
     /* Slider */
     .stSlider > div > div {
-        background-color: #2D2D2D;
+        background-color: #2D2D2D !important;
+    }
+    
+    .stSlider label {
+        color: #FFFFFF !important;
     }
     
     /* Multiselect */
     .stMultiSelect > div > div {
-        background-color: #2D2D2D;
-        color: #FFFFFF;
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+        border: 1px solid #555 !important;
+    }
+    
+    .stMultiSelect label {
+        color: #FFFFFF !important;
     }
     
     /* Radio buttons */
     .stRadio > div {
-        background-color: #2D2D2D;
-        color: #FFFFFF;
+        background-color: #1E1E1E !important;
+        color: #FFFFFF !important;
+    }
+    
+    .stRadio label {
+        color: #FFFFFF !important;
+    }
+    
+    /* Radio option labels */
+    .stRadio div[role="radiogroup"] label {
+        color: #FFFFFF !important;
+    }
+    
+    /* Alerts and messages */
+    .stAlert {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+        border: 1px solid #555 !important;
+    }
+    
+    /* Error messages */
+    .stError {
+        background-color: #4A2D2D !important;
+        color: #FFB3B3 !important;
+    }
+    
+    /* Success messages */
+    .stSuccess {
+        background-color: #2D4A2D !important;
+        color: #B3FFB3 !important;
+    }
+    
+    /* Info messages */
+    .stInfo {
+        background-color: #2D3D4A !important;
+        color: #B3D9FF !important;
+    }
+    
+    /* Warning messages */
+    .stWarning {
+        background-color: #4A452D !important;
+        color: #FFFEB3 !important;
+    }
+    
+    /* Input fields */
+    .stTextInput > div > div > input {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+        border: 1px solid #555 !important;
+    }
+    
+    .stTextInput label {
+        color: #FFFFFF !important;
+    }
+    
+    /* Number input */
+    .stNumberInput > div > div > input {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+        border: 1px solid #555 !important;
+    }
+    
+    .stNumberInput label {
+        color: #FFFFFF !important;
+    }
+    
+    /* Text area */
+    .stTextArea > div > div > textarea {
+        background-color: #2D2D2D !important;
+        color: #FFFFFF !important;
+        border: 1px solid #555 !important;
+    }
+    
+    .stTextArea label {
+        color: #FFFFFF !important;
+    }
+    
+    /* Buttons */
+    .stButton button {
+        background-color: #444 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #666 !important;
+    }
+    
+    .stButton button:hover {
+        background-color: #555 !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Download button */
+    .stDownloadButton button {
+        background-color: #444 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #666 !important;
+    }
+    
+    /* Spinner */
+    .stSpinner > div {
+        border-top-color: #FFFFFF !important;
+    }
+    
+    /* Progress bar */
+    .stProgress .st-bo {
+        background-color: #444 !important;
     }
     
     /* Quality score badges */
@@ -166,6 +366,52 @@ def set_page_config():
     /* Plotly charts - force dark background */
     .js-plotly-plot {
         background-color: #1E1E1E !important;
+    }
+    
+    .plotly {
+        background-color: #1E1E1E !important;
+    }
+    
+    /* Additional specific selectors for stubborn elements */
+    div[data-testid="stSidebar"] {
+        background-color: #2D2D2D !important;
+    }
+    
+    /* Container backgrounds */
+    .element-container {
+        background-color: transparent !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Block containers */
+    .block-container {
+        background-color: #1E1E1E !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Fix for markdown text in containers */
+    .element-container .stMarkdown {
+        color: #FFFFFF !important;
+    }
+    
+    /* Column containers */
+    [data-testid="column"] {
+        background-color: transparent !important;
+        color: #FFFFFF !important;
+    }
+    
+    /* Ensure all divs in main content are dark */
+    .main div {
+        color: #FFFFFF !important;
+    }
+    
+    /* Fix for any remaining light backgrounds */
+    div[style*="background-color: rgb(255, 255, 255)"] {
+        background-color: #2D2D2D !important;
+    }
+    
+    div[style*="background-color: white"] {
+        background-color: #2D2D2D !important;
     }
     </style>
     """, unsafe_allow_html=True)
