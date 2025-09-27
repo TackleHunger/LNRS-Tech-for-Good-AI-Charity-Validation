@@ -2,7 +2,7 @@
 Tackle Hunger Data Explorer - Streamlit Application
 
 A data visualization and exploration tool for charity validation data.
-Features tree browsing, data quality analysis, and geographic visualization.
+Features tree browsing, data quality analysis, and network graph visualization.
 """
 
 import streamlit as st
@@ -13,8 +13,6 @@ import networkx as nx
 from typing import Dict, Any, List, Optional
 import numpy as np
 from math import radians, cos, sin, asin, sqrt
-import folium
-from streamlit_folium import st_folium
 import json
 from dataclasses import asdict
 
@@ -425,10 +423,9 @@ def load_data():
         site_ops = SiteOperations(client)
         org_ops = OrganizationOperations(client)
         
-        # Load all sites and organizations using the new pagination methods
-        # For the data explorer, we'll load all data at once for complete analysis
-        sites = site_ops.get_all_sites_for_ai(per_page=10, minimal=False)
-        organizations = org_ops.get_all_organizations_for_ai(per_page=10, minimal=False)
+        # Load sites and organizations using the simple staging API methods
+        sites = site_ops.get_sites_for_ai(limit=50)  # Use the staging method signature
+        organizations = org_ops.get_all_organizations_for_ai()  # This method exists
         
         return sites, organizations
     except Exception as e:
@@ -671,50 +668,6 @@ def create_network_graph(sites: List[Dict[str, Any]]) -> go.Figure:
     )
     
     return fig
-
-
-def create_map_visualization(sites: List[Dict[str, Any]]) -> folium.Map:
-    """Create a folium map showing site locations."""
-    # Calculate center point
-    sites_with_coords = [s for s in sites if s.get('lat') and s.get('lng')]
-    
-    if not sites_with_coords:
-        # Default to center of US
-        center_lat, center_lng = 39.8283, -98.5795
-    else:
-        center_lat = sum(s['lat'] for s in sites_with_coords) / len(sites_with_coords)
-        center_lng = sum(s['lng'] for s in sites_with_coords) / len(sites_with_coords)
-    
-    # Create map
-    m = folium.Map(location=[center_lat, center_lng], zoom_start=10, tiles='OpenStreetMap')
-    
-    # Add markers for each site
-    for site in sites:
-        if site.get('lat') and site.get('lng'):
-            # Calculate quality score for color
-            quality = calculate_site_quality_score(site)
-            color = get_quality_color(quality['overall_score'])
-            
-            # Create popup text
-            popup_text = f"""
-            <b>{site.get('name', 'Unknown')}</b><br>
-            {site.get('streetAddress', '')}<br>
-            {site.get('city', '')}, {site.get('state', '')} {site.get('zip', '')}<br>
-            <br>
-            Quality Score: {quality['overall_score']:.2f} ({get_quality_grade(quality['overall_score'])})<br>
-            Phone: {site.get('publicPhone', 'Not provided')}<br>
-            Email: {site.get('publicEmail', 'Not provided')}<br>
-            Website: {site.get('website', 'Not provided')}
-            """
-            
-            folium.Marker(
-                location=[site['lat'], site['lng']],
-                popup=folium.Popup(popup_text, max_width=300),
-                tooltip=site.get('name', 'Unknown Site'),
-                icon=folium.Icon(color='green' if quality['overall_score'] >= 0.7 else 'orange' if quality['overall_score'] >= 0.5 else 'red')
-            ).add_to(m)
-    
-    return m
 
 
 def display_tree_structure(organizations: List[Dict[str, Any]]):
@@ -1125,7 +1078,7 @@ def main():
     st.sidebar.title("📋 Navigation")
     page = st.sidebar.radio(
         "Choose a view:",
-        ["Tree Structure", "Data Tables", "Paginated Data", "Quality Analytics", "Map Visualization", "Network Graph"]
+        ["Tree Structure", "Data Tables", "Paginated Data", "Quality Analytics", "Network Graph"]
     )
     
     # Display data summary
@@ -1151,14 +1104,6 @@ def main():
         display_paginated_data()
     elif page == "Quality Analytics":
         display_quality_analytics(sites, organizations)
-    elif page == "Map Visualization":
-        st.subheader("🗺️ Site Locations Map")
-        if sites:
-            with st.spinner("Creating map..."):
-                map_obj = create_map_visualization(sites)
-                st_folium(map_obj, width=700, height=500)
-        else:
-            st.info("No sites with location data available")
     elif page == "Network Graph":
         st.subheader("🕸️ Site Network Visualization")
         if sites:
