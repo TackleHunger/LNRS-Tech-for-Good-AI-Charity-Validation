@@ -54,20 +54,86 @@ def set_page_config():
         initial_sidebar_state="expanded"
     )
     
-    # Apply dark mode with pastel colors
+    # Apply comprehensive dark mode with pastel colors
     st.markdown("""
     <style>
+    /* Main app background */
+    .stApp {
+        background-color: #1E1E1E;
+        color: #FFFFFF;
+    }
+    
+    /* Main content area */
     .main > div {
         background-color: #1E1E1E;
         color: #FFFFFF;
     }
+    
+    /* Sidebar */
+    .css-1d391kg {
+        background-color: #2D2D2D;
+    }
+    
+    /* All text elements */
+    .stMarkdown, .stText, .stCaption {
+        color: #FFFFFF;
+    }
+    
+    /* Headers */
+    h1, h2, h3, h4, h5, h6 {
+        color: #FFFFFF !important;
+    }
+    
+    /* Selectbox and other inputs */
     .stSelectbox > div > div {
         background-color: #2D2D2D;
         color: #FFFFFF;
     }
+    
+    /* Dataframes */
     .stDataFrame {
         background-color: #2D2D2D;
     }
+    
+    /* Metric containers */
+    .metric-container {
+        background-color: #2D2D2D;
+    }
+    
+    /* Expander */
+    .streamlit-expanderHeader {
+        background-color: #2D2D2D;
+        color: #FFFFFF;
+    }
+    
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        background-color: #2D2D2D;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background-color: #2D2D2D;
+        color: #FFFFFF;
+    }
+    
+    /* Slider */
+    .stSlider > div > div {
+        background-color: #2D2D2D;
+    }
+    
+    /* Multiselect */
+    .stMultiSelect > div > div {
+        background-color: #2D2D2D;
+        color: #FFFFFF;
+    }
+    
+    /* Radio buttons */
+    .stRadio > div {
+        background-color: #2D2D2D;
+        color: #FFFFFF;
+    }
+    
+    /* Quality score badges */
     .quality-score-high {
         background-color: #BAFFC9;
         color: #000000;
@@ -95,6 +161,11 @@ def set_page_config():
         padding: 2px 4px;
         border-radius: 2px;
         font-style: italic;
+    }
+    
+    /* Plotly charts - force dark background */
+    .js-plotly-plot {
+        background-color: #1E1E1E !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -319,8 +390,9 @@ def create_network_graph(sites: List[Dict[str, Any]]) -> go.Figure:
         )],
         xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)'
+        paper_bgcolor='#1E1E1E',
+        plot_bgcolor='#1E1E1E',
+        font=dict(color='white')
     )
     
     return fig
@@ -560,9 +632,12 @@ def display_quality_analytics(sites: List[Dict[str, Any]], organizations: List[D
             )
             fig_hist.update_traces(marker_color=PASTEL_COLORS['light_blue'])
             fig_hist.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font_color='white'
+                paper_bgcolor='#1E1E1E',
+                plot_bgcolor='#1E1E1E',
+                font_color='white',
+                title_font_color='white',
+                xaxis=dict(color='white'),
+                yaxis=dict(color='white')
             )
             st.plotly_chart(fig_hist, use_container_width=True)
     
@@ -577,9 +652,12 @@ def display_quality_analytics(sites: List[Dict[str, Any]], organizations: List[D
             )
             fig_hist_org.update_traces(marker_color=PASTEL_COLORS['light_green'])
             fig_hist_org.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font_color='white'
+                paper_bgcolor='#1E1E1E',
+                plot_bgcolor='#1E1E1E',
+                font_color='white',
+                title_font_color='white',
+                xaxis=dict(color='white'),
+                yaxis=dict(color='white')
             )
             st.plotly_chart(fig_hist_org, use_container_width=True)
     
@@ -604,10 +682,13 @@ def display_quality_analytics(sites: List[Dict[str, Any]], organizations: List[D
             )
             fig_empty.update_traces(marker_color=PASTEL_COLORS['pink'])
             fig_empty.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='#1E1E1E',
+                plot_bgcolor='#1E1E1E',
                 font_color='white',
-                xaxis_tickangle=-45
+                title_font_color='white',
+                xaxis_tickangle=-45,
+                xaxis=dict(color='white'),
+                yaxis=dict(color='white')
             )
             st.plotly_chart(fig_empty, use_container_width=True)
 

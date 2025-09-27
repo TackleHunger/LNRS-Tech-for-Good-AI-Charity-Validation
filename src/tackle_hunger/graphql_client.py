@@ -18,7 +18,6 @@ class TackleHungerConfig(BaseSettings):
     ai_scraping_token: str
     environment: str = "dev"
     tkh_graphql_endpoint: str = os.getenv("AI_SCRAPING_GRAPHQL_URL", "https://devapi.sboc.us/graphql")
-    production_endpoint: str = os.getenv("PRODUCTION_GRAPHQL_URL", "https://api.sboc.us/graphql")
     timeout: int = 30
     rate_limit: int = 10
 
@@ -52,8 +51,7 @@ class TackleHungerClient:
             timeout=self.config.timeout,
         )
 
-        # Disable schema fetching to avoid compatibility issues
-        return Client(transport=transport, fetch_schema_from_transport=False)
+        return Client(transport=transport, fetch_schema_from_transport=True)
 
     def execute_query(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute a GraphQL query."""
