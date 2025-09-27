@@ -52,7 +52,8 @@ class TackleHungerClient:
             timeout=self.config.timeout,
         )
 
-        return Client(transport=transport, fetch_schema_from_transport=True)
+        # Disable schema fetching to avoid compatibility issues
+        return Client(transport=transport, fetch_schema_from_transport=False)
 
     def execute_query(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute a GraphQL query."""
