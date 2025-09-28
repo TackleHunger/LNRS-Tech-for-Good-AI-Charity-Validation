@@ -14,19 +14,11 @@ class SiteOperations:
     def __init__(self, client: TackleHungerClient):
         self.client = client
 
-    def get_sites_for_ai(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-        """Fetch sites for AI processing.
-        
-        Args:
-            limit: Maximum number of sites to return (not supported by GraphQL API)
-            
-        Note: The GraphQL API doesn't support server-side limiting on sitesForAI field.
-        All data is returned and client-side limiting should be applied if needed.
-        """
-        # Fixed query without limit argument as it's not supported by the API
+    def get_sites_for_ai(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Fetch sites for AI processing."""
         query = '''
-        query GetSitesForAI {
-            sitesForAI {
+        query GetSitesForAI($limit: Int) {
+            sitesForAI(limit: $limit) {
                 id
                 organizationId
                 name
@@ -34,8 +26,6 @@ class SiteOperations:
                 city
                 state
                 zip
-                lat
-                lng
                 publicEmail
                 publicPhone
                 website
@@ -48,41 +38,8 @@ class SiteOperations:
         }
         '''
 
-        try:
-            result = self.client.execute_query(query)
-            sites = result.get("sitesForAI", [])
-            
-            # Apply limit client-side if specified
-            if limit is not None:
-                sites = sites[:limit]
-                
-            return sites
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Full query failed, trying minimal fields: {str(e)[:100]}...")
-            # If query fails, try a minimal version
-            minimal_query = '''
-            query GetSitesForAIMinimal {
-                sitesForAI {
-                    id
-                    name
-                    city
-                    state
-                    status
-                }
-            }
-            '''
-            try:
-                result = self.client.execute_query(minimal_query)
-                sites = result.get("sitesForAI", [])
-                if limit is not None:
-                    sites = sites[:limit]
-                return sites
-            except Exception as minimal_e:
-                logger.error(f"Minimal query also failed: {str(minimal_e)}")
-                # Return empty list to allow app to continue with demo data
-                return []
+        result = self.client.execute_query(query, {"limit": limit})
+        return result.get("sitesForAI", [])
 
     def create_site(self, site_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new charity site."""

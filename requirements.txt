@@ -1,38 +1,27 @@
 # Core HTTP and GraphQL client libraries
 requests>=2.31.0
-httpx>=0.25.0
 graphql-core>=3.2.0
 gql[requests]>=3.4.0
 
-# Data validation and parsing
-pydantic>=2.4.0
-pydantic[email]>=2.4.0
-pydantic-settings>=2.0.0
-
 # Environment and configuration management
 python-dotenv>=1.0.0
-pyyaml>=6.0.1
 
 # Date/time handling
 python-dateutil>=2.8.2
-
-# Async support for API operations
-aiohttp>=3.8.0
-asyncio-throttle>=1.0.2
 
 # Data processing utilities
 pandas>=2.1.0
 numpy>=1.24.0
 
-# Logging and monitoring
-structlog>=23.1.0
+# Streamlit and visualization
+streamlit>=1.28.0
+plotly>=5.17.0
+networkx>=3.1
 
 # Testing frameworks
 pytest>=7.4.0
-pytest-asyncio>=0.21.0
 pytest-mock>=3.11.0
 
 # Development utilities
 black>=23.7.0
 flake8>=6.0.0
-mypy>=1.5.0
