@@ -8,6 +8,18 @@ NO EXTERNAL CALLS - Only GraphQL endpoint access.
 
 import os
 import sys
+import time
+import logging
+
+# Configure logging for console output with telemetry
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),  # Ensure console output
+        logging.FileHandler('data_explorer.log') if os.path.exists('.') else logging.NullHandler()
+    ]
+)
 
 # Disable any external network calls before importing streamlit
 os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
@@ -427,17 +439,45 @@ def set_page_config():
 
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_data():
-    """Load data from Tackle Hunger API with caching - REAL DATA ONLY."""
-    client = TackleHungerClient()
-    site_ops = SiteOperations(client)
-    org_ops = OrganizationOperations(client)
+    """Load data from Tackle Hunger API with caching and logging - REAL DATA ONLY."""
+    import logging
     
-    # Load sites and organizations using the correct staging API methods
-    # The sitesForAI field does not support limit argument - limit is applied client-side
-    sites = site_ops.get_sites_for_ai(limit=None, minimal=False)  # Load all sites
-    organizations = org_ops.get_all_organizations_for_ai()  # Load all organizations
+    # Set up console logging for the data loading process
+    logger = logging.getLogger(__name__)
+    logger.info("🔄 Starting data load from Tackle Hunger GraphQL API")
     
-    return sites, organizations
+    start_time = time.time()
+    
+    try:
+        client = TackleHungerClient()
+        site_ops = SiteOperations(client)
+        org_ops = OrganizationOperations(client)
+        
+        logger.info("📡 Initialized GraphQL client and operations")
+        
+        # Load sites and organizations using the correct staging API methods
+        # The sitesForAI field does not support limit argument - limit is applied client-side
+        logger.info("🏢 Loading all sites from API...")
+        sites = site_ops.get_sites_for_ai(limit=None)  # Load all sites
+        
+        logger.info("🏛️ Loading all organizations from API...")
+        organizations = org_ops.get_all_organizations_for_ai()  # Load all organizations
+        
+        # Log completion telemetry
+        load_time = time.time() - start_time
+        logger.info(f"✅ Data load completed successfully")
+        logger.info(f"⏱️  Total Load Time: {load_time:.3f}s")
+        logger.info(f"📊 Sites Loaded: {len(sites)}")
+        logger.info(f"📊 Organizations Loaded: {len(organizations)}")
+        logger.info("💾 Data cached for 5 minutes")
+        
+        return sites, organizations
+        
+    except Exception as e:
+        load_time = time.time() - start_time
+        logger.error(f"❌ Data load failed after {load_time:.3f}s")
+        logger.error(f"🚨 Error: {str(e)}")
+        raise
 
 
 def load_paginated_data(data_type: str = "sites", page: int = 1, per_page: int = 10):
@@ -1011,29 +1051,41 @@ def display_quality_analytics(sites: List[Dict[str, Any]], organizations: List[D
             st.plotly_chart(fig_empty, use_container_width=True)
 
 
+
 def main():
-    """Main Streamlit application."""
+    """Main application entry point with comprehensive logging."""
+    logger = logging.getLogger(__name__)
+    
     set_page_config()
     
     st.title("🍽️ Tackle Hunger Data Explorer")
-    st.markdown("*Exploring charity validation data with interactive visualizations*")
+    st.markdown("*Live API Data Visualization & Analysis Tool*")
     
-    # Load data
-    with st.spinner("Loading data from Tackle Hunger API..."):
-        sites, organizations = load_data()
+    # Navigation sidebar
+    st.sidebar.title("Navigation")
+    page = st.sidebar.selectbox("Choose a view:", [
+        "Tree Structure", 
+        "Data Tables",
+        "Paginated Data",
+        "Quality Analytics", 
+        "Network Graph"
+    ])
     
-    if not sites and not organizations:
-        st.error("No data could be loaded. Please check your API connection.")
+    # Load data with error handling and logging
+    try:
+        logger.info(f"📄 User selected page: {page}")
+        
+        with st.spinner("Loading data from Tackle Hunger API..."):
+            sites, organizations = load_data()
+            logger.info(f"📊 Data loaded successfully - {len(sites)} sites, {len(organizations)} orgs")
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to load data: {str(e)}")
+        st.error("Failed to load data from the API. Please check your connection and try again.")
+        st.stop()
         return
     
-    # Sidebar for navigation
-    st.sidebar.title("📋 Navigation")
-    page = st.sidebar.radio(
-        "Choose a view:",
-        ["Tree Structure", "Data Tables", "Paginated Data", "Quality Analytics", "Network Graph"]
-    )
-    
-    # Display data summary
+    # Display data summary with logging
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Total Sites", len(sites))
@@ -1047,16 +1099,25 @@ def main():
             avg_quality = sum(calculate_site_quality_score(site)['overall_score'] for site in sites) / len(sites)
             st.metric("Avg Quality Score", f"{avg_quality:.3f}")
     
+    # Log page rendering start
+    logger.info(f"🎨 Rendering page: {page}")
+    start_render = time.time()
+    
     # Display selected page
     if page == "Tree Structure":
+        logger.info("🌳 Rendering tree structure view")
         display_tree_structure(organizations)
     elif page == "Data Tables":
+        logger.info("📊 Rendering data tables view")  
         display_data_tables(sites, organizations)
     elif page == "Paginated Data":
+        logger.info("📄 Rendering paginated data view")
         display_paginated_data()
     elif page == "Quality Analytics":
+        logger.info("📈 Rendering quality analytics view")
         display_quality_analytics(sites, organizations)
     elif page == "Network Graph":
+        logger.info("🕸️ Rendering network graph view")
         st.subheader("🕸️ Site Network Visualization")
         if sites:
             with st.spinner("Creating network graph..."):
@@ -1064,6 +1125,10 @@ def main():
                 st.plotly_chart(fig_network, use_container_width=True)
         else:
             st.info("No sites data available for network graph")
+    
+    # Log page rendering completion
+    render_time = time.time() - start_render
+    logger.info(f"✅ Page rendered successfully in {render_time:.3f}s")
     
     # Footer
     st.markdown("---")
@@ -1079,4 +1144,10 @@ def main():
 
 
 if __name__ == "__main__":
+    # Initialize logging for main application
+    logger = logging.getLogger(__name__)
+    logger.info("🚀 Starting Tackle Hunger Data Explorer")
+    logger.info("🔧 Initializing Streamlit application with network isolation")
+    
+    main()
     main()

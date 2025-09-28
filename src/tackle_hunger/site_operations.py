@@ -14,55 +14,39 @@ class SiteOperations:
     def __init__(self, client: TackleHungerClient):
         self.client = client
 
-    def get_sites_for_ai(self, limit: Optional[int] = None, minimal: bool = False) -> List[Dict[str, Any]]:
+    def get_sites_for_ai(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
         """Fetch sites for AI processing.
         
         Args:
-            limit: Maximum number of sites to return (applied client-side)
-            minimal: If True, returns only essential fields to avoid large payloads
+            limit: Maximum number of sites to return (not supported by GraphQL API)
             
         Note: The GraphQL API doesn't support server-side limiting on sitesForAI field.
-        For large datasets, consider using minimal=True to reduce network load.
+        All data is returned and client-side limiting should be applied if needed.
         """
-        
-        if minimal:
-            # Minimal query for better performance with large datasets
-            query = '''
-            query GetSitesForAIMinimal {
-                sitesForAI {
-                    id
-                    name
-                    city
-                    state
-                    status
-                }
+        # Fixed query without limit argument as it's not supported by the API
+        query = '''
+        query GetSitesForAI {
+            sitesForAI {
+                id
+                organizationId
+                name
+                streetAddress
+                city
+                state
+                zip
+                lat
+                lng
+                publicEmail
+                publicPhone
+                website
+                description
+                serviceArea
+                acceptsFoodDonations
+                status
+                ein
             }
-            '''
-        else:
-            # Full query with all available fields
-            query = '''
-            query GetSitesForAI {
-                sitesForAI {
-                    id
-                    organizationId
-                    name
-                    streetAddress
-                    city
-                    state
-                    zip
-                    publicEmail
-                    publicPhone
-                    website
-                    description
-                    serviceArea
-                    acceptsFoodDonations
-                    status
-                    ein
-                    lat
-                    lng
-                }
-            }
-            '''
+        }
+        '''
 
         try:
             result = self.client.execute_query(query)
@@ -74,12 +58,26 @@ class SiteOperations:
                 
             return sites
         except Exception as e:
-            # If full query fails due to size, automatically retry with minimal fields
-            if not minimal:
-                print(f"Warning: Full query failed ({str(e)[:100]}...), retrying with minimal fields")
-                return self.get_sites_for_ai(limit=limit, minimal=True)
-            else:
-                raise
+            # If query fails, try a minimal version
+            minimal_query = '''
+            query GetSitesForAIMinimal {
+                sitesForAI {
+                    id
+                    name
+                    city
+                    state
+                    status
+                }
+            }
+            '''
+            try:
+                result = self.client.execute_query(minimal_query)
+                sites = result.get("sitesForAI", [])
+                if limit is not None:
+                    sites = sites[:limit]
+                return sites
+            except Exception as minimal_e:
+                raise Exception(f"Failed to fetch sites: {str(e)}. Minimal query also failed: {str(minimal_e)}")
 
     def create_site(self, site_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new charity site."""

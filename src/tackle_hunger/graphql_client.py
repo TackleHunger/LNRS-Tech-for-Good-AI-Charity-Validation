@@ -1,68 +1,47 @@
 """
 GraphQL Client for Tackle Hunger API
 
-GraphQL operations for charity validation volunteers.
+Provides authenticated GraphQL operations for charity validation.
 """
 
 import os
+import time
+import logging
 from typing import Optional, Dict, Any
+import requests
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
+from pydantic_settings import BaseSettings
+
+# Configure logging for API telemetry
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
-class TackleHungerConfig:
-    """
-    Configuration class for Tackle Hunger API client with environment-based settings.
+class TackleHungerConfig(BaseSettings):
+    """Configuration for Tackle Hunger API client."""
 
-    Loads API tokens, environment, timeout, and endpoint URLs from environment variables or constructor arguments.
+    ai_scraping_token: str
+    environment: str = "dev"
+    tkh_graphql_endpoint: str = os.getenv("AI_SCRAPING_GRAPHQL_URL", "https://devapi.sboc.us/graphql")
+    timeout: int = 30
+    rate_limit: int = 10
 
-    Attributes:
-        ai_scraping_token (str): API token for authentication.
-        environment (str): Current environment ('production', 'staging', 'dev').
-        timeout (int): Timeout for API requests in seconds.
-        endpoints (dict): Mapping of environment names to GraphQL endpoint URLs.
+    class Config:
+        env_file = ".env"
 
-    Property:
-        graphql_endpoint (str): Returns the GraphQL endpoint URL for the current environment.
-    """
-    
-    def __init__(self, 
-                 ai_scraping_token: Optional[str] = None,
-                 environment: Optional[str] = None):
-        # Load environment variables if .env file exists
-        try:
-            from dotenv import load_dotenv
-            load_dotenv()
-        except ImportError:
-            # dotenv is optional - fallback to os.getenv
-            pass
-        
-        # Allow override via constructor or fall back to environment
-        self.ai_scraping_token = ai_scraping_token or os.getenv("AI_SCRAPING_TOKEN", "dummy_token_for_testing")
-        self.environment = environment or os.getenv("ENVIRONMENT", "dev")
-        
-        # Simple defaults - no validation needed for volunteer work
-        timeout_str = os.getenv("API_TIMEOUT", "30")
-        try:
-            self.timeout = int(timeout_str)
-        except (ValueError, TypeError):
-            self.timeout = 30
-        
-        # Endpoint URLs - clear and simple
-        self.endpoints = {
-            "production": "https://api.sboc.us/graphql",
-            "staging": "https://stagingapi.sboc.us/graphql", 
-            "dev": os.getenv("AI_SCRAPING_GRAPHQL_URL", "https://devapi.sboc.us/graphql")
-        }
-    
     @property
     def graphql_endpoint(self) -> str:
-        """Get the GraphQL endpoint based on environment."""
-        return self.endpoints.get(self.environment, self.endpoints["dev"])
+        """Get the appropriate GraphQL endpoint based on environment."""
+        return (
+            self.production_endpoint
+            if self.environment == "production"
+            else self.tkh_graphql_endpoint
+        )
 
 
 class TackleHungerClient:
-    """GraphQL client for charity validation"""
+    """GraphQL client for Tackle Hunger charity validation operations."""
 
     def __init__(self, config: Optional[TackleHungerConfig] = None):
         self.config = config or TackleHungerConfig()
@@ -77,9 +56,76 @@ class TackleHungerClient:
             },
             timeout=self.config.timeout,
         )
+
         return Client(transport=transport, fetch_schema_from_transport=False)
 
     def execute_query(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute a GraphQL query."""
-        gql_query = gql(query)
-        return self._client.execute(gql_query, variable_values=variables)
+        """Execute a GraphQL query with logging and telemetry."""
+        start_time = time.time()
+        
+        # Log API call initiation
+        operation_name = self._extract_operation_name(query)
+        logger.info(f"🚀 API Call Started: {operation_name}")
+        logger.info(f"📡 Endpoint: {self.config.graphql_endpoint}")
+        logger.info(f"📊 Environment: {self.config.environment}")
+        
+        if variables:
+            logger.info(f"📥 Variables: {variables}")
+        
+        try:
+            gql_query = gql(query)
+            result = self._client.execute(gql_query, variable_values=variables)
+            
+            # Calculate execution time
+            execution_time = time.time() - start_time
+            
+            # Log successful completion with telemetry
+            logger.info(f"✅ API Call Completed: {operation_name}")
+            logger.info(f"⏱️  Execution Time: {execution_time:.3f}s")
+            
+            # Log data size telemetry
+            if result:
+                self._log_response_telemetry(result, operation_name)
+            
+            return result
+            
+        except Exception as e:
+            execution_time = time.time() - start_time
+            logger.error(f"❌ API Call Failed: {operation_name}")
+            logger.error(f"⏱️  Execution Time: {execution_time:.3f}s")
+            logger.error(f"🚨 Error: {str(e)}")
+            raise
+
+    def _extract_operation_name(self, query: str) -> str:
+        """Extract operation name from GraphQL query."""
+        lines = query.strip().split('\n')
+        for line in lines:
+            line = line.strip()
+            if line.startswith('query ') or line.startswith('mutation '):
+                parts = line.split()
+                if len(parts) >= 2:
+                    return parts[1].replace('{', '').strip()
+        return "UnknownOperation"
+
+    def _log_response_telemetry(self, result: Dict[str, Any], operation_name: str):
+        """Log response size and data telemetry."""
+        try:
+            # Log data counts for common operations
+            if 'sitesForAI' in result:
+                count = len(result['sitesForAI'])
+                logger.info(f"📈 Data Retrieved: {count} sites")
+                
+            elif 'organizationsForAI' in result:
+                count = len(result['organizationsForAI'])  
+                logger.info(f"📈 Data Retrieved: {count} organizations")
+                
+            # Log response size
+            response_size = len(str(result))
+            logger.info(f"📦 Response Size: {response_size:,} bytes")
+            
+            # Log memory usage estimation
+            if response_size > 1000000:  # > 1MB
+                logger.info(f"💾 Large Response: Consider using pagination for {operation_name}")
+                
+        except Exception as e:
+            logger.debug(f"Telemetry logging failed: {e}")
