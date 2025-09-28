@@ -427,107 +427,49 @@ def set_page_config():
 
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_data():
-    """Load data from Tackle Hunger API with caching."""
-    try:
-        client = TackleHungerClient()
-        site_ops = SiteOperations(client)
-        org_ops = OrganizationOperations(client)
-        
-        # Load sites and organizations using the simple staging API methods
-        sites = site_ops.get_sites_for_ai(limit=50)  # Use the staging method signature
-        organizations = org_ops.get_all_organizations_for_ai()  # This method exists
-        
-        return sites, organizations
-    except Exception as e:
-        st.error(f"Failed to load data from API: {str(e)}")
-        st.info("Using sample data for demonstration purposes.")
-        
-        # Return sample data
-        return get_sample_data()
+    """Load data from Tackle Hunger API with caching - REAL DATA ONLY."""
+    client = TackleHungerClient()
+    site_ops = SiteOperations(client)
+    org_ops = OrganizationOperations(client)
+    
+    # Load sites and organizations using the correct staging API methods
+    # The sitesForAI field does not support limit argument - limit is applied client-side
+    sites = site_ops.get_sites_for_ai(limit=None, minimal=False)  # Load all sites
+    organizations = org_ops.get_all_organizations_for_ai()  # Load all organizations
+    
+    return sites, organizations
 
 
 def load_paginated_data(data_type: str = "sites", page: int = 1, per_page: int = 10):
-    """Load paginated data for display with pagination controls."""
-    try:
-        client = TackleHungerClient()
-        
-        if data_type == "sites":
-            site_ops = SiteOperations(client)
-            result = site_ops.get_sites_for_ai(page=page, per_page=per_page, minimal=False)
-        else:  # organizations
-            org_ops = OrganizationOperations(client)
-            result = org_ops.get_organizations_for_ai(page=page, per_page=per_page, minimal=False)
-        
-        return result
-    except Exception as e:
-        st.error(f"Failed to load paginated data from API: {str(e)}")
-        # Return a paginated structure with sample data
-        sample_sites, sample_orgs = get_sample_data()
-        sample_data = sample_sites if data_type == "sites" else sample_orgs
-        
-        return {
-            "data": sample_data,
-            "page": 1,
-            "per_page": len(sample_data),
-            "total_pages": 1,
-            "total_count": len(sample_data)
-        }
-
-
-def get_sample_data():
-    """Generate sample data for demonstration when API is not available."""
-    sample_sites = [
-        {
-            "id": "site_1",
-            "organizationId": "org_1", 
-            "name": "Downtown Food Bank",
-            "streetAddress": "123 Main St",
-            "city": "Springfield",
-            "state": "IL",
-            "zip": "62701",
-            "lat": 39.7817,
-            "lng": -89.6501,
-            "publicPhone": "(555) 123-4567",
-            "publicEmail": "info@downtownfood.org",
-            "website": "https://downtownfoodbank.org",
-            "description": "Providing food assistance to families in need",
-            "status": "ACTIVE",
-            "acceptsFoodDonations": "YES"
-        },
-        {
-            "id": "site_2",
-            "organizationId": "org_1",
-            "name": "Community Kitchen",
-            "streetAddress": "456 Oak Ave", 
-            "city": "Springfield",
-            "state": "IL",
-            "zip": "62702",
-            "lat": 39.7956,
-            "lng": -89.6645,
-            "publicPhone": None,
-            "publicEmail": None,
-            "website": None,
-            "description": None,
-            "status": "ACTIVE"
-        }
-    ]
+    """Load paginated data for display with pagination controls - REAL DATA ONLY."""
     
-    sample_orgs = [
-        {
-            "id": "org_1",
-            "name": "Springfield Food Network",
-            "streetAddress": "789 Elm St",
-            "city": "Springfield", 
-            "state": "IL",
-            "zip": "62703",
-            "publicPhone": "(555) 987-6543",
-            "publicEmail": "contact@springfieldnetwork.org",
-            "website": "https://springfieldnetwork.org",
-            "sites": sample_sites
-        }
-    ]
+    # Load all data first (it's cached for 5 minutes)
+    sites, organizations = load_data()
     
-    return sample_sites, sample_orgs
+    # Select the appropriate dataset
+    if data_type == "sites":
+        all_data = sites
+    else:  # organizations
+        all_data = organizations
+    
+    # Calculate pagination
+    total_count = len(all_data)
+    total_pages = (total_count + per_page - 1) // per_page  # Ceiling division
+    
+    # Calculate start and end indices for current page
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    
+    # Get paginated data
+    paginated_data = all_data[start_idx:end_idx]
+    
+    return {
+        "data": paginated_data,
+        "page": page,
+        "per_page": per_page,
+        "total_pages": total_pages,
+        "total_count": total_count
+    }
 
 
 def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
