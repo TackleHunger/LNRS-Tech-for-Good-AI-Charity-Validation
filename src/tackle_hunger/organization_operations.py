@@ -108,12 +108,22 @@ class OrganizationOperations:
                 "total_count": total_count
             }
         except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
             # If full query fails due to size, automatically retry with minimal fields
             if not minimal:
-                print(f"Warning: Full query failed ({str(e)[:100]}...), retrying with minimal fields")
+                logger.warning(f"Full organizations query failed ({str(e)[:100]}...), retrying with minimal fields")
                 return self.get_organizations_for_ai(page=page, per_page=per_page, minimal=True)
             else:
-                raise
+                logger.error(f"Organizations query failed: {str(e)}")
+                # Return empty result to allow app to continue
+                return {
+                    "data": [],
+                    "page": page,
+                    "per_page": per_page,
+                    "total_pages": 1,
+                    "total_count": 0
+                }
 
     def get_all_organizations_for_ai(self, per_page: int = 10, minimal: bool = False) -> List[Dict[str, Any]]:
         """Fetch all organizations for AI processing.

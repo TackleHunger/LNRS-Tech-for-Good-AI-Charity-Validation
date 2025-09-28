@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class TackleHungerConfig(BaseSettings):
     """Configuration for Tackle Hunger API client."""
 
-    ai_scraping_token: str
+    ai_scraping_token: str = os.getenv("AI_SCRAPING_TOKEN", "")
     environment: str = "dev"
     tkh_graphql_endpoint: str = os.getenv("AI_SCRAPING_GRAPHQL_URL", "https://devapi.sboc.us/graphql")
     timeout: int = 30
@@ -33,11 +33,7 @@ class TackleHungerConfig(BaseSettings):
     @property
     def graphql_endpoint(self) -> str:
         """Get the appropriate GraphQL endpoint based on environment."""
-        return (
-            self.production_endpoint
-            if self.environment == "production"
-            else self.tkh_graphql_endpoint
-        )
+        return self.tkh_graphql_endpoint
 
 
 class TackleHungerClient:
@@ -49,11 +45,13 @@ class TackleHungerClient:
 
     def _create_client(self) -> Client:
         """Create authenticated GraphQL client."""
+        headers = {}
+        if self.config.ai_scraping_token:
+            headers["ai-scraping-token"] = self.config.ai_scraping_token
+            
         transport = RequestsHTTPTransport(
             url=self.config.graphql_endpoint,
-            headers={
-                "ai-scraping-token": self.config.ai_scraping_token,
-            },
+            headers=headers,
             timeout=self.config.timeout,
         )
 

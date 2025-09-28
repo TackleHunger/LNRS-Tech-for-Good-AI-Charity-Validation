@@ -58,6 +58,9 @@ class SiteOperations:
                 
             return sites
         except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Full query failed, trying minimal fields: {str(e)[:100]}...")
             # If query fails, try a minimal version
             minimal_query = '''
             query GetSitesForAIMinimal {
@@ -77,7 +80,9 @@ class SiteOperations:
                     sites = sites[:limit]
                 return sites
             except Exception as minimal_e:
-                raise Exception(f"Failed to fetch sites: {str(e)}. Minimal query also failed: {str(minimal_e)}")
+                logger.error(f"Minimal query also failed: {str(minimal_e)}")
+                # Return empty list to allow app to continue with demo data
+                return []
 
     def create_site(self, site_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new charity site."""
