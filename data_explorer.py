@@ -3,7 +3,17 @@ Tackle Hunger Data Explorer - Streamlit Application
 
 A data visualization and exploration tool for charity validation data.
 Features tree browsing, data quality analysis, and network graph visualization.
+NO EXTERNAL CALLS - Only GraphQL endpoint access.
 """
+
+import os
+import sys
+
+# Disable any external network calls before importing streamlit
+os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
+os.environ['STREAMLIT_SERVER_HEADLESS'] = 'true'
+os.environ['STREAMLIT_SERVER_ADDRESS'] = 'localhost'
+os.environ['STREAMLIT_SERVER_PORT'] = '8000'
 
 import streamlit as st
 import pandas as pd

@@ -1,8 +1,47 @@
+[global]
+# Disable all development and warning features
+showWarningOnDirectExecution = false
+
 [server]
+# Run in headless mode - no browser opening
 headless = true
 
+# Force localhost only - no external network detection
+address = "localhost"  
+port = 8000
+
+# Disable CORS and XSRF which might trigger external lookups
+enableCORS = false
+enableXsrfProtection = false
+
+# Disable static file serving which might cause network calls
+enableStaticServing = false
+
+# Disable websocket compression to avoid potential network overhead
+enableWebsocketCompression = false
+
 [browser]
+# Completely disable usage statistics collection
 gatherUsageStats = false
 
-[global]
-disableWatchdogWarning = true
+# Force browser connection to localhost only
+serverAddress = "localhost"
+serverPort = 8000
+
+[client]
+# Use minimal toolbar to avoid external feature checks
+toolbarMode = "minimal"
+
+# Don't show error details which might trigger external lookups
+showErrorDetails = "none"
+
+[runner]
+# Disable magic mode which might cause external calls
+magicEnabled = false
+
+# Use fast reruns to avoid delays that might trigger timeouts/external calls
+fastReruns = true
+
+[logger]
+# Set minimal logging to avoid external log services
+level = "error"
