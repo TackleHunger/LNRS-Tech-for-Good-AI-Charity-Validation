@@ -2,6 +2,30 @@
 
 **Simple charity validation for volunteers** - Help families find food assistance by keeping charity information accurate and up-to-date.
 
+## 🍽️ Data Explorer - NEW!
+
+**Explore charity data with zero external calls** - Interactive Streamlit visualization tool with network graphs, quality analytics, and data browsing.
+
+### Run Data Explorer (No AWS/External Calls)
+```bash
+# Method 1: Use the no-external-calls runner (RECOMMENDED)
+python run_explorer.py
+
+# Method 2: Standard Streamlit (with comprehensive config)
+streamlit run data_explorer.py
+
+# Method 3: Test the explorer
+python test_data_explorer.py
+```
+
+**Features:**
+- 🌳 **Tree Structure Browsing** - Hierarchical organization/site view
+- 📄 **Paginated Data** - Browse 10 items per page efficiently  
+- 🕸️ **Network Graph** - Site relationships with distance-based edges
+- 📊 **Data Quality Analytics** - Score distributions and empty field analysis
+- 🎨 **Dark Theme** - Professional pastel color scheme
+- 🚫 **NO External Calls** - Only GraphQL endpoint access (no AWS, no maps, no IP detection)
+
 ## ⚡ Quick Start for Volunteers
 
 **Ready to help in 5 minutes:**

@@ -15,7 +15,7 @@ Welcome to the Tackle Hunger Charity Validation project! This guide will get you
 
 3. **Verify everything works:**
    ```bash
-   python -m pytest tests/
+   python -m pytest
    ```
 
 ## 📋 What You'll Be Working On

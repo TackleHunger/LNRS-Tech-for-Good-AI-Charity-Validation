@@ -55,6 +55,16 @@ import os
 os.environ['HTTPS_PROXY'] = 'https://your-proxy:port'
 os.environ['HTTP_PROXY'] = 'http://your-proxy:port'
 
+# SSL verification (if using internal certificates)
+import ssl
+import certifi
+import requests
+
+# For custom certificate bundle
+requests_session = requests.Session()
+requests_session.verify = '/path/to/your/certificate/bundle.pem'
+```
+
 ### Security Considerations
 
 **Rate Limiting:**

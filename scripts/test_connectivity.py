@@ -1,92 +1,72 @@
 #!/usr/bin/env python3
 """
-Connectivity test for Tackle Hunger volunteers.
-Tests that you can reach the API and basic internet resources.
+Connectivity test script for Tackle Hunger development environment.
+
+Tests network access to required APIs and services.
 """
 
 import requests
 import sys
+from urllib.parse import urlparse
 
 
-def test_endpoint(url: str, name: str) -> bool:
-    """Test connectivity to an endpoint."""
+REQUIRED_ENDPOINTS = [
+    "https://devapi.sboc.us/graphql",
+    "https://pypi.org/simple/requests/",
+    "https://github.com",
+    "https://api.github.com"
+]
+
+
+def test_endpoint(url: str, timeout: int = 10) -> bool:
+    """Test connectivity to a single endpoint."""
     try:
-        print(f"Testing {name}...", end=" ")
-        response = requests.get(url, timeout=10)
-        
+        parsed = urlparse(url)
+        host = parsed.netloc
+
+        print(f"Testing {host}...", end=" ")
+
+        response = requests.get(url, timeout=timeout, allow_redirects=True)
+
         if response.status_code < 400:
-            print("✅ OK")
+            print("✓ OK")
             return True
         else:
-            print(f"⚠️ HTTP {response.status_code}")
+            print(f"⚠ HTTP {response.status_code}")
             return False
-            
-    except Exception as e:
-        print(f"❌ Failed: {str(e)[:50]}...")
+
+    except requests.exceptions.Timeout:
+        print("⚠ Timeout")
         return False
-
-
-def test_graphql_endpoint(url: str, name: str) -> bool:
-    """Test GraphQL endpoint with proper introspection query."""
-    try:
-        print(f"Testing {name}...", end=" ")
-        
-        # Simple introspection query to test if GraphQL endpoint is working
-        query = {"query": "{ __schema { queryType { name } } }"}
-        response = requests.post(url, json=query, timeout=10)
-        
-        if response.status_code == 200:
-            print("✅ OK")
-            return True
-        else:
-            print(f"⚠️ HTTP {response.status_code}")
-            return False
-            
+    except requests.exceptions.ConnectionError:
+        print("✗ Connection Error")
+        return False
     except Exception as e:
-        print(f"❌ Failed: {str(e)[:50]}...")
+        print(f"✗ Error: {e}")
         return False
 
 
 def main():
     """Run connectivity tests."""
-    print("🌐 Testing connectivity for Tackle Hunger...")
-    print("=" * 40)
+    print("Testing connectivity to required endpoints...")
+    print("=" * 50)
 
-    # Core endpoints volunteers need
-    tests = [
-        ("https://pypi.org/simple/requests/", "Python Package Index"),
-        ("https://github.com", "GitHub")
-    ]
-    
-    # GraphQL endpoints need special handling
-    graphql_tests = [
-        ("https://devapi.sboc.us/graphql", "Tackle Hunger Dev API")
-    ]
+    success_count = 0
+    total_count = len(REQUIRED_ENDPOINTS)
 
-    passed = 0
-    
-    # Test regular endpoints
-    for url, name in tests:
-        if test_endpoint(url, name):
-            passed += 1
-    
-    # Test GraphQL endpoints
-    for url, name in graphql_tests:
-        if test_graphql_endpoint(url, name):
-            passed += 1
+    for endpoint in REQUIRED_ENDPOINTS:
+        if test_endpoint(endpoint):
+            success_count += 1
 
-    total_tests = len(tests) + len(graphql_tests)
+    print("=" * 50)
+    print(f"Results: {success_count}/{total_count} endpoints accessible")
 
-    print("=" * 40)
-    print(f"Results: {passed}/{total_tests} tests passed")
-
-    if passed == total_tests:
-        print("🎉 All connectivity tests passed!")
-        print("You're ready to validate charities!")
+    if success_count == total_count:
+        print("✓ All connectivity tests passed!")
         sys.exit(0)
     else:
-        print("⚠️ Some tests failed. Check your network connection.")
-        print("Ask your team lead if you need help with firewall settings.")
+        print("⚠ Some endpoints are not accessible.")
+        print("Please check your firewall configuration or network settings.")
         sys.exit(1)
 
 
