@@ -1,6 +1,6 @@
-# LNRS Tech for Good: Non-Technical Volunteer Onboarding Checklist 📋
+# LNRS Tech for Good: Complete Volunteer Onboarding Checklist 📋
 
-*A detailed, hand-held guide for joining the Tackle Hunger charity validation project - designed for team members who are new to programming or technical setup*
+*A step-by-step guide for joining the Tackle Hunger charity validation project*
 
 ---
 
