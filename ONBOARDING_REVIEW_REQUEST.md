@@ -12,9 +12,9 @@
 
 ### **Three Documents - Ready for Use:**
 
-1. **📋 [Hub Selector](VOLUNTEER_ONBOARDING_README.md)** - Directs team members to appropriate checklist
-2. **🔧 [Technical Setup Checklist](TECHNICAL_VOLUNTEER_ONBOARDING.md)** - For developers/technical team members (5-10 min setup)
-3. **👥 [Non-Technical Setup Checklist](NON_TECHNICAL_VOLUNTEER_ONBOARDING.md)** - For team members new to development tools (detailed guidance)
+1. **📋 [Hub Selector](https://github.com/TackleHunger/LNRS-Tech-for-Good-AI-Charity-Validation/blob/main/VOLUNTEER_ONBOARDING_README.md)** - Directs team members to appropriate checklist
+2. **🔧 [Technical Setup Checklist](https://github.com/TackleHunger/LNRS-Tech-for-Good-AI-Charity-Validation/blob/main/TECHNICAL_VOLUNTEER_ONBOARDING.md)** - For developers/technical team members (5-10 min setup)
+3. **👥 [Non-Technical Setup Checklist](https://github.com/TackleHunger/LNRS-Tech-for-Good-AI-Charity-Validation/blob/main/NON_TECHNICAL_VOLUNTEER_ONBOARDING.md)** - For team members new to development tools (detailed guidance)
 
 ---
 
