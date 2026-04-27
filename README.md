@@ -1,0 +1,1 @@
+# LNRS-Tech-for-Good-AI-Charity-Validation
