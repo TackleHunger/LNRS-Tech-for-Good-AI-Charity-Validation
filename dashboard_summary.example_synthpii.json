@@ -1,0 +1,52 @@
+{
+  "run_id": "example_run",
+  "batch_id": "EXAMPLE0000",
+  "trigger": "manual",
+  "generated_at": "2026-01-01T00:00:00Z",
+  "status": "healthy",
+  "overall_metrics": {
+    "total_sites_processed": 3,
+    "current_run_sites": 3,
+    "classifications": {
+      "candidate_approved": 2,
+      "deferred_low_confidence": 1,
+      "needs_exception_review": 0
+    }
+  },
+  "percentages": {
+    "candidate_approved": 66.7,
+    "deferred_low_confidence": 33.3,
+    "needs_exception_review": 0.0
+  },
+  "top_issues": {
+    "value_is_missing_or_blank": 2,
+    "web_evidence_medium_confidence (web_scrape)": 1
+  },
+  "top_missed_values": [],
+  "detected_changes": [
+    {
+      "site_id": "EXAMPLE001",
+      "site_name": "Example Community Food Pantry",
+      "field": "publicPhone",
+      "change_type": "fill_gap",
+      "original_value": null,
+      "proposed_value": "(555) 010-0000",
+      "confidence": 0.82
+    }
+  ],
+  "closure_alerts": [],
+  "recent_batches": [
+    {
+      "date": "2026-01-01",
+      "batch_runs": 1,
+      "site_count": 3,
+      "sites_with_changes": 1,
+      "percent_with_changes": 33.3,
+      "classification_counts": {
+        "candidate_approved": 2,
+        "needs_exception_review": 0,
+        "deferred_low_confidence": 1
+      }
+    }
+  ]
+}

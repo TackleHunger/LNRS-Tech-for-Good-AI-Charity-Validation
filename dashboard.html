@@ -1,0 +1,2078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TackleHunger — AI Validation Report</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* ===== CUSTOM SCROLLBARS (dark, subtle) ===== */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        /* Firefox */
+        * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.12) transparent; }
+
+        :root {
+            --bg-body:    #0d1117;
+            --bg-card:    #161b22;
+            --bg-card-alt:#1c2333;
+            --bg-input:   #21262d;
+            --border:     #30363d;
+            --text:       #e6edf3;
+            --text-muted: #8b949e;
+            --text-dim:   #6e7681;
+            --accent-green:  #2ea043;
+            --accent-green-bg: rgba(46,160,67,0.15);
+            --accent-red:    #f85149;
+            --accent-red-bg: rgba(248,81,73,0.15);
+            --accent-yellow: #d29922;
+            --accent-yellow-bg: rgba(210,153,34,0.15);
+            --accent-blue:   #58a6ff;
+            --accent-blue-bg:rgba(88,166,255,0.12);
+            --accent-purple: #bc8cff;
+            --accent-purple-bg:rgba(188,140,255,0.12);
+            --accent-coral:  #f78166;
+            --bar-pink:   #f778a1;
+            --bar-blue:   #58a6ff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg-body);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .header .subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .header .status-bar {
+            margin-top: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .header .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-healthy { background: var(--accent-green); }
+        .status-attention { background: var(--accent-yellow); }
+
+        /* ===== TRIGGER BADGE ===== */
+        .trigger-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .trigger-badge.scheduled {
+            background: rgba(56,139,253,0.15);
+            color: #58a6ff;
+            border: 1px solid rgba(56,139,253,0.3);
+        }
+        .trigger-badge.manual {
+            background: rgba(210,168,255,0.12);
+            color: #d2a8ff;
+            border: 1px solid rgba(210,168,255,0.3);
+        }
+
+        /* ===== METRIC CARDS ===== */
+        .metric-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .metric-card {
+            padding: 20px 18px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .metric-card .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .metric-card .metric-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 6px;
+            opacity: 0.85;
+        }
+        .mc-sites     { background: #30363d; color: #e6edf3; }
+        .mc-approved  { background: var(--accent-green); color: #fff; }
+        .mc-review    { background: var(--accent-yellow); color: #fff; }
+        .mc-deferred  { background: var(--accent-red); color: #fff; }
+        .mc-fill      { background: var(--accent-blue); color: #fff; }
+        .mc-correct   { background: var(--accent-purple); color: #fff; }
+
+        /* ===== SECTION CARDS ===== */
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .section .section-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        /* ===== TWO-COL LAYOUT ===== */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 768px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+
+        /* ===== HORIZONTAL BAR CHART ===== */
+        .hbar-list { list-style: none; }
+        .hbar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .hbar-label {
+            width: 250px;
+            text-align: right;
+            flex-shrink: 0;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        .hbar-bar {
+            flex: 1;
+            height: 28px;
+            border-radius: 14px;
+            position: relative;
+            overflow: hidden;
+            /* track bg rendered via box-shadow inset */
+            background: rgba(255,255,255,0.04);
+        }
+        .hbar-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: var(--fill);
+            border-radius: 14px;
+            background: rgba(247, 120, 161, 0.5);
+        }
+        .hbar-value {
+            width: 80px;
+            text-align: right;
+            font-size: 13px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        /* ===== DONUT CHART ===== */
+        .donut-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+        .donut-canvas-wrap {
+            position: relative;
+            width: 180px; height: 180px;
+        }
+        .donut-canvas-wrap canvas {
+            width: 100%; height: 100%;
+        }
+        .donut-center-label {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .donut-center-label .pct {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .donut-center-label .pct-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .donut-legend {
+            list-style: none;
+            font-size: 13px;
+        }
+        .donut-legend li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .donut-swatch {
+            width: 12px; height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        /* ===== BATCH TREND BARS ===== */
+        .trend-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 170px;
+            padding-top: 8px;
+        }
+        .trend-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 0;
+        }
+        .trend-bar {
+            width: 100%;
+            max-width: 48px;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+        }
+        .trend-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            writing-mode: horizontal-tb;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60px;
+            text-align: center;
+            line-height: 1.1;
+        }
+        .trend-count {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .trend-sub {
+            font-size: 9px;
+            color: var(--text-dim);
+            opacity: 0.7;
+            white-space: nowrap;
+            line-height: 1.1;
+            margin-top: 0;
+        }
+
+        /* ===== FILTER PILLS ===== */
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .filter-pill {
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            min-width: 110px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .filter-pill:hover { border-color: var(--text-muted); }
+        .filter-pill.active {
+            background: var(--accent-blue-bg);
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        .filter-pill .pill-count {
+            display: inline-block;
+            min-width: 18px;
+            text-align: center;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+        .pc-green  { background: var(--accent-green-bg); color: var(--accent-green); }
+        .pc-yellow { background: var(--accent-yellow-bg); color: var(--accent-yellow); }
+        .pc-red    { background: var(--accent-red-bg); color: var(--accent-red); }
+
+        /* ===== TABLE ===== */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .data-table th:hover { color: var(--text); }
+        .data-table th .sort-arrow { margin-left: 4px; font-size: 10px; opacity: 0.4; }
+        .data-table th.sorted .sort-arrow { opacity: 1; color: var(--accent-blue); }
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .data-table tr:hover td {
+            background: rgba(255,255,255,0.03);
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        .badge-correction { background: var(--accent-purple-bg); color: var(--accent-purple); }
+        .badge-fill-gap   { background: var(--accent-blue-bg); color: var(--accent-blue); }
+        .badge-approved    { background: var(--accent-green-bg); color: var(--accent-green); }
+        .badge-review      { background: var(--accent-yellow-bg); color: var(--accent-yellow); }
+        .badge-deferred    { background: var(--accent-red-bg); color: var(--accent-red); }
+        .badge-high        { background: var(--accent-red-bg); color: var(--accent-red); }
+        .badge-moderate    { background: var(--accent-blue-bg); color: var(--accent-blue); }
+
+        .source-tag {
+            display: inline-block;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-weight: 500;
+        }
+        .source-tag-platform  { background: var(--accent-purple-bg); color: var(--accent-purple); }
+        .source-tag-directory { background: var(--accent-yellow-bg); color: var(--accent-yellow); }
+        .source-tag-official  { background: var(--accent-green-bg); color: var(--accent-green); }
+
+        /* ===== TOP CHANGES ===== */
+        .top-change-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            margin-top: 10px;
+            background: var(--bg-card-alt);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .top-change-details { flex: 1; }
+        .top-change-site {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 14px;
+        }
+        .top-change-field {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin: 2px 0 6px;
+        }
+        .top-change-values {
+            font-family: 'Cascadia Code', 'Consolas', monospace;
+            font-size: 13px;
+            color: var(--text);
+        }
+        .arrow { color: var(--text-dim); margin: 0 8px; }
+        .top-change-confidence {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+        .top-change-type {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            margin-bottom: 4px;
+        }
+
+        /* ===== CLOSURE ALERT ===== */
+        .closure-section {
+            background: var(--accent-red-bg);
+            border: 1px solid var(--accent-red);
+            border-left: 5px solid var(--accent-red);
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .closure-section h2 { color: var(--accent-red); }
+        .closure-item {
+            background: var(--bg-card);
+            border: 1px solid var(--accent-red);
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-top: 8px;
+        }
+        .closure-site { font-weight: 600; }
+        .closure-reason { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+        /* ===== QUALITY PILLS ===== */
+        .quality-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .quality-pill {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--accent-yellow-bg);
+            color: var(--accent-yellow);
+            font-size: 13px;
+        }
+        .quality-pill.high-impact {
+            background: var(--accent-red-bg);
+            color: var(--accent-red);
+            font-weight: 600;
+        }
+        .quality-pill .count { font-weight: 700; font-size: 14px; }
+        .quality-pill .pct { opacity: 0.75; font-size: 12px; }
+        .quality-empty { color: var(--accent-green); font-style: italic; }
+
+        /* ===== GUIDE CARDS ===== */
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 768px) {
+            .guide-grid { grid-template-columns: 1fr; }
+        }
+        .guide-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            border-top: 3px solid;
+        }
+        .guide-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .guide-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+        .gc-approved { border-top-color: var(--accent-green); }
+        .gc-approved h3 { color: var(--accent-green); }
+        .gc-review   { border-top-color: var(--accent-yellow); }
+        .gc-review h3  { color: var(--accent-yellow); }
+        .gc-deferred { border-top-color: var(--accent-red); }
+        .gc-deferred h3 { color: var(--accent-red); }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .search-box {
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-input);
+            color: var(--text);
+            font-size: 13px;
+            width: 260px;
+        }
+        .search-box::placeholder { color: var(--text-dim); }
+        .export-btn {
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .export-btn:hover { background: #79b8ff; }
+        .export-btn:disabled { background: #30363d; color: var(--text-dim); cursor: not-allowed; }
+
+        /* ===== NO DATA MSG ===== */
+        .no-data {
+            color: var(--text-dim);
+            font-style: italic;
+            padding: 20px 0;
+        }
+
+        /* ===== CONFIDENCE BAR ===== */
+        .conf-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .conf-bar {
+            width: 60px;
+            height: 6px;
+            background: var(--bg-input);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .conf-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+        .conf-high   { background: var(--accent-green); }
+        .conf-mid    { background: var(--accent-yellow); }
+        .conf-low    { background: var(--accent-red); }
+
+        /* ===== REVIEW BUTTONS ===== */
+        .review-btn-group {
+            display: flex;
+            gap: 4px;
+        }
+        .review-btn {
+            padding: 3px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .review-btn:hover { border-color: var(--text); color: var(--text); }
+        .review-btn.rb-accept.active {
+            background: var(--accent-green);
+            color: #fff;
+            border-color: var(--accent-green);
+        }
+        .review-btn.rb-reject.active {
+            background: var(--accent-red);
+            color: #fff;
+            border-color: var(--accent-red);
+        }
+        .export-review-btn {
+            background: #238636;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+            margin-left: 8px;
+        }
+        .export-review-btn:hover { background: #2ea043; }
+        .export-review-btn:disabled { background: #30363d; color: var(--text-dim); cursor: not-allowed; }
+
+        /* ===== CORRECTED VALUE INPUT ===== */
+        .corrected-value-wrap {
+            margin-top: 4px;
+        }
+        .corrected-value-wrap label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .corrected-value-input {
+            width: 100%;
+            max-width: 180px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--accent-red);
+            background: var(--bg-input);
+            color: var(--text);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        .corrected-value-input::placeholder { color: var(--text-dim); font-size: 11px; }
+
+        /* ===== MANUAL ENTRY BUTTON ===== */
+        .manual-entry-btn {
+            background: var(--accent-purple);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+        .manual-entry-btn:hover { background: #d2a8ff; }
+        .badge-manual { background: var(--accent-purple-bg); color: var(--accent-purple); }
+
+        /* ===== MANUAL ENTRY MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 32px;
+            width: 420px;
+            max-width: 95vw;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+        }
+        .modal-box h3 {
+            margin-bottom: 18px;
+            font-size: 16px;
+            color: var(--accent-purple);
+        }
+        .modal-field {
+            margin-bottom: 14px;
+        }
+        .modal-field label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .modal-field select,
+        .modal-field input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-input);
+            color: var(--text);
+            font-size: 13px;
+        }
+        .modal-field select option { background: var(--bg-card); }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-actions button {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: all 0.15s;
+        }
+        .modal-cancel {
+            background: transparent;
+            color: var(--text-muted);
+        }
+        .modal-cancel:hover { color: var(--text); border-color: var(--text-muted); }
+        .modal-submit {
+            background: var(--accent-purple);
+            color: #fff;
+            border-color: var(--accent-purple);
+        }
+        .modal-submit:hover { background: #d2a8ff; }
+        .modal-submit:disabled { background: #30363d; color: var(--text-dim); border-color: var(--border); cursor: not-allowed; }
+
+        /* ===== CORRECTED VALUE TOOLTIP INDICATOR ===== */
+        .corrected-indicator {
+            display: inline-block;
+            margin-left: 4px;
+            font-size: 12px;
+            color: var(--text-dim);
+            cursor: default;
+            position: relative;
+        }
+        .corrected-indicator:hover {
+            color: var(--accent-blue);
+        }
+        .corrected-indicator .cv-tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card-alt);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+            transition: opacity 0.15s;
+        }
+        .corrected-indicator:hover .cv-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* ===== SAVE STATE PILLS ===== */
+        .save-state {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+            white-space: nowrap;
+        }
+        .save-pending {
+            background: var(--accent-yellow-bg);
+            color: var(--accent-yellow);
+        }
+        .save-done {
+            background: var(--accent-green-bg);
+            color: var(--accent-green);
+        }
+
+        /* ===== TOP MISSED VALUES TABLE ===== */
+        .missed-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .missed-table th {
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .missed-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .missed-table tr:hover td {
+            background: rgba(255,255,255,0.03);
+        }
+
+        /* ===== TOAST NOTIFICATION ===== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+        .toast.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== SCROLL SHADOW ===== */
+        .table-scroll {
+            max-height: 520px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        .table-scroll .data-table thead th {
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <h1>TackleHunger — AI Validation Report</h1>
+        <div class="subtitle" id="header-subtitle"></div>
+        <div class="status-bar" id="status-bar">
+            <span class="trigger-badge" id="trigger-badge"></span>
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text"></span>
+        </div>
+    </div>
+
+    <!-- ===== METRIC CARDS ===== -->
+    <div class="metric-row" id="metrics"></div>
+
+    <!-- ===== GUIDE CARDS ===== -->
+    <div class="guide-grid">
+        <div class="guide-card gc-approved">
+            <h3>Approved</h3>
+            <p>High confidence in data accuracy. Fields confirmed and consistent.</p>
+            <p><strong>Action:</strong> Ready for use — no review needed.</p>
+        </div>
+        <div class="guide-card gc-review">
+            <h3>Review Before Use</h3>
+            <p>Medium confidence. Some fields may have proposed updates.</p>
+            <p><strong>Action:</strong> Review proposed changes before using.</p>
+        </div>
+        <div class="guide-card gc-deferred">
+            <h3>Needs Attention</h3>
+            <p>Low confidence. Key info missing or significant inconsistencies.</p>
+            <p><strong>Action:</strong> Requires manual research and verification.</p>
+        </div>
+    </div>
+
+    <!-- ===== CLOSURE ALERT ===== -->
+    <div class="closure-section" id="closure-card" style="display:none;">
+        <h2>⚠ Possible Site Closures Detected</h2>
+        <p style="color:var(--text-muted);font-size:13px;margin:4px 0 12px;">These sites may be permanently closed and require immediate verification.</p>
+        <div id="closure-list"></div>
+    </div>
+
+    <!-- ===== CLASSIFICATION DONUT + TOP ISSUES BARS ===== -->
+    <div class="two-col">
+        <div class="section">
+            <h2>Classification Breakdown</h2>
+            <div class="section-sub">Distribution of site validation outcomes</div>
+            <div class="donut-wrapper" id="donut-area"></div>
+        </div>
+        <div class="section">
+            <h2>Top Issues</h2>
+            <div class="section-sub">Most frequent validation findings</div>
+            <ul class="hbar-list" id="issues-bars"></ul>
+        </div>
+    </div>
+
+    <!-- ===== DATA QUALITY ===== -->
+    <div class="section" id="quality-section">
+        <h2>Data Quality Issues</h2>
+        <div class="section-sub">Fields requiring attention before data can be used</div>
+        <div class="quality-list" id="quality-list"></div>
+    </div>
+
+    <!-- ===== TOP CHANGES ===== -->
+    <div class="section">
+        <h2>Top Changes to Act On</h2>
+        <div class="section-sub">Highest-priority proposed updates ranked by confidence and impact</div>
+        <div id="top-changes" style="max-height:480px;overflow-y:auto;"></div>
+    </div>
+
+    <!-- ===== TOP MISSED VALUES ===== -->
+    <div class="section" id="missed-values-section">
+        <h2>Top Missed Values</h2>
+        <div class="section-sub">Proposed values rejected by reviewers where the correct value was provided</div>
+        <div id="missed-values-content"></div>
+    </div>
+
+    <!-- ===== CHANGES TABLE ===== -->
+    <div class="section">
+        <h2>Detected Changes</h2>
+        <div class="section-sub">
+            <span id="total-changes">0</span> changes across <span id="records-with-changes">0</span>% of records
+        </div>
+
+        <div class="toolbar">
+            <div>
+                <input type="text" class="search-box" id="table-search" placeholder="Filter by site name, field, or value…">
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <div class="filter-row" id="change-filters" style="margin-bottom:0;display:grid;grid-template-columns:repeat(3,auto);gap:8px;justify-content:center;"></div>
+                <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+                <button id="export-btn" class="export-btn">Export CSV</button>
+                <button id="export-review-btn" class="export-review-btn" disabled title="Export review decisions to review_log.json">Export Reviews</button>
+                <button id="manual-entry-btn" class="manual-entry-btn" title="Add data found outside the AI scrape">+ Manual Entry</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-scroll">
+            <table class="data-table" id="changes-table">
+                <thead>
+                    <tr>
+                        <th data-col="site">Site Name <span class="sort-arrow">▲</span></th>
+                        <th data-col="field">Field <span class="sort-arrow">▲</span></th>
+                        <th data-col="original">Original Value <span class="sort-arrow">▲</span></th>
+                        <th data-col="proposed">Proposed Value <span class="sort-arrow">▲</span></th>
+                        <th data-col="type">Change Type <span class="sort-arrow">▲</span></th>
+                        <th data-col="confidence">Confidence <span class="sort-arrow">▲</span></th>
+                        <th data-col="review">Review</th>
+                    </tr>
+                </thead>
+                <tbody id="changes-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===== BATCH TREND ===== -->
+    <div class="section">
+        <h2>Batch History</h2>
+        <div class="section-sub">Daily totals — bar height shows sites processed per day</div>
+        <div class="trend-chart" id="batch-trend"></div>
+    </div>
+
+</div><!-- / container -->
+
+<!-- ===== MANUAL ENTRY MODAL ===== -->
+<div class="modal-overlay" id="manual-entry-modal">
+    <div class="modal-box">
+        <h3>&#9998; Add Manual Entry</h3>
+        <div class="modal-field">
+            <label>Site Name</label>
+            <select id="me-site"><option value="">— select a site —</option></select>
+        </div>
+        <div class="modal-field">
+            <label>Field</label>
+            <select id="me-field">
+                <option value="">— select a field —</option>
+                <option value="publicPhone">Public Phone</option>
+                <option value="publicEmail">Public Email</option>
+                <option value="website">Website</option>
+                <option value="streetAddress">Street Address</option>
+                <option value="city">City</option>
+                <option value="state">State</option>
+                <option value="zip">Zip</option>
+                <option value="description">Description</option>
+                <option value="operational_status" style="color:#e74c3c;font-weight:600">⚠ Permanently Closed</option>
+            </select>
+        </div>
+        <div class="modal-field">
+            <label>Value</label>
+            <input type="text" id="me-value" placeholder="Enter the correct value">
+            <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;color:var(--text-muted);cursor:pointer">
+                <input type="checkbox" id="me-blank" style="accent-color:#e74c3c;cursor:pointer">
+                Leave blank (remove current value)
+            </label>
+        </div>
+        <div class="modal-field">
+            <label>Source / Notes <span style="font-weight:400;color:var(--text-dim)">(optional)</span></label>
+            <input type="text" id="me-source" placeholder="e.g. called the charity, found on Facebook">
+        </div>
+        <div class="modal-actions">
+            <button class="modal-cancel" id="me-cancel">Cancel</button>
+            <button class="modal-submit" id="me-submit" disabled>Add Entry</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========================================================================
+//  DASHBOARD LOGIC
+// ========================================================================
+
+// ------------------------------------------------------------------------
+//  Centralized data loader (graceful fallback)
+// ------------------------------------------------------------------------
+// Real charity data files (dashboard_summary.json, ai_validation_report.json,
+// ...) are git-ignored and may be absent on a fresh/public clone. For each
+// logical data file we try the real `<name>.json` first, then fall back to the
+// committed placeholder `<name>.example_synthpii.json`. This keeps the dashboard
+// functional with sample data instead of crashing when real data is missing.
+let USING_PLACEHOLDER_DATA = false;
+function loadData(name) {
+    const real = `${name}.json`;
+    // `_synthpii` is a PII-scanner earlySkip marker so the placeholder files
+    // are ignored by the PII checker (they contain only synthetic sample data).
+    const example = `${name}.example_synthpii.json`;
+    return fetch(real)
+        .then(r => (r.ok ? r.json() : Promise.reject(new Error(`missing ${real}`))))
+        .catch(() => fetch(example).then(r => {
+            if (!r.ok) throw new Error(`No data or example file for '${name}'`);
+            USING_PLACEHOLDER_DATA = true;
+            console.info(`[dashboard] Using placeholder ${example} (real ${real} not found).`);
+            return r.json();
+        }));
+}
+
+function showPlaceholderNotice() {
+    if (!USING_PLACEHOLDER_DATA || document.getElementById('placeholder-notice')) return;
+    const note = document.createElement('div');
+    note.id = 'placeholder-notice';
+    note.style.cssText = 'background:var(--accent-yellow,#d29922);color:#1c1c1c;padding:8px 16px;'
+        + 'font-size:13px;text-align:center;font-weight:600;';
+    note.textContent = 'Showing sample placeholder data — real charity data '
+        + '(charity-data.json / *.json) was not found. See README for setup.';
+    document.body.insertBefore(note, document.body.firstChild);
+}
+
+loadData('dashboard_summary')
+.then(data => {
+    showPlaceholderNotice();
+
+    // ---- helpers ----
+    const esc = s => {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    };
+
+    // ---- header ----
+    const metrics = data.overall_metrics;
+    const totalSites = metrics.current_run_sites ?? metrics.total_sites_processed ?? 0;
+    const genDate = data.generated_at ? new Date(data.generated_at) : null;
+    const fmtDate = genDate ? genDate.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : '';
+    const batchId = data.batch_id || '';
+    document.getElementById('header-subtitle').textContent =
+        batchId ? `${totalSites} sites · ${fmtDate} · Batch ${batchId}` : `${totalSites} sites · ${fmtDate}`;
+
+    const isHealthy = data.status === 'healthy';
+    document.getElementById('status-dot').className = 'status-dot ' + (isHealthy ? 'status-healthy' : 'status-attention');
+    document.getElementById('status-text').textContent = isHealthy ? 'All systems healthy' : 'Needs attention — high deferral rate';
+
+    // ---- trigger badge (auto vs manual) ----
+    const trigger = data.trigger || 'manual';
+    const triggerBadge = document.getElementById('trigger-badge');
+    triggerBadge.className = 'trigger-badge ' + (trigger === 'scheduled' ? 'scheduled' : 'manual');
+    triggerBadge.textContent = trigger === 'scheduled' ? '⚡ Auto-run' : '✋ Manual';
+
+    // ---- run_id (metadata for review tracking) ----
+    const runId = data.run_id || '';
+
+    // ---- metric cards ----
+    const changes = data.detected_changes || [];
+    const cls = metrics.classifications || {};
+    document.getElementById('metrics').innerHTML = `
+        <div class="metric-card mc-sites">
+            <div class="metric-value">${totalSites}</div>
+            <div class="metric-label">Sites Processed</div>
+        </div>
+        <div class="metric-card mc-approved">
+            <div class="metric-value">${cls.candidate_approved || 0}</div>
+            <div class="metric-label">Approved</div>
+        </div>
+        <div class="metric-card mc-review">
+            <div class="metric-value">${cls.needs_exception_review || 0}</div>
+            <div class="metric-label">Exception Queue</div>
+        </div>
+        <div class="metric-card mc-deferred">
+            <div class="metric-value">${cls.deferred_low_confidence || 0}</div>
+            <div class="metric-label">Deferred</div>
+        </div>
+        <div class="metric-card mc-fill">
+            <div class="metric-value">${changes.filter(c => c.change_type === 'fill_gap').length}</div>
+            <div class="metric-label">Values Found</div>
+        </div>
+        <div class="metric-card mc-correct">
+            <div class="metric-value">${changes.filter(c => c.change_type === 'correction').length}</div>
+            <div class="metric-label">Corrections</div>
+        </div>
+    `;
+
+    // ---- closure alerts ----
+    const closureAlerts = data.closure_alerts || [];
+    if (closureAlerts.length > 0) {
+        document.getElementById('closure-card').style.display = 'block';
+        document.getElementById('closure-list').innerHTML = closureAlerts.map(a => `
+            <div class="closure-item">
+                <div class="closure-site">${esc(a.site_name || 'Unknown')}</div>
+                <div class="closure-reason">${esc(a.reason || 'Possible closure detected.')}</div>
+            </div>
+        `).join('');
+    }
+
+    // ---- classification donut ----
+    (function drawDonut() {
+        const area = document.getElementById('donut-area');
+        const segments = [
+            { label: 'Approved',         value: cls.candidate_approved || 0,       color: 'var(--accent-green)', hex: '#2ea043' },
+            { label: 'Exception Queue',  value: cls.needs_exception_review || 0,   color: 'var(--accent-yellow)',hex: '#d29922' },
+            { label: 'Deferred',         value: cls.deferred_low_confidence || 0,  color: 'var(--accent-red)',   hex: '#f85149' },
+        ];
+        const total = segments.reduce((s, x) => s + x.value, 0);
+        if (total === 0) {
+            area.innerHTML = '<p class="no-data">No classification data available.</p>';
+            return;
+        }
+        const approvedPct = total > 0 ? Math.round((segments[0].value / total) * 100) : 0;
+
+        // Canvas donut
+        const wrap = document.createElement('div');
+        wrap.className = 'donut-canvas-wrap';
+        const canvas = document.createElement('canvas');
+        canvas.width = 360; canvas.height = 360;
+        wrap.appendChild(canvas);
+        // NOTE: do NOT use innerHTML+= here — it serializes the DOM,
+        // destroying the live canvas node and replacing it with a clone
+        // that the drawing context no longer references.
+        const centerLabel = document.createElement('div');
+        centerLabel.className = 'donut-center-label';
+        centerLabel.innerHTML = `
+            <div class="pct">${approvedPct}%</div>
+            <div class="pct-sub">approved</div>
+        `;
+        wrap.appendChild(centerLabel);
+
+        // Legend
+        const legend = document.createElement('ul');
+        legend.className = 'donut-legend';
+        segments.forEach(seg => {
+            const pct = total > 0 ? ((seg.value / total) * 100).toFixed(1) : 0;
+            legend.innerHTML += `
+                <li>
+                    <span class="donut-swatch" style="background:${seg.hex};"></span>
+                    ${esc(seg.label)}: <strong>${seg.value}</strong> (${pct}%)
+                </li>
+            `;
+        });
+
+        area.appendChild(wrap);
+        area.appendChild(legend);
+
+        // Draw
+        const ctx = canvas.getContext('2d');
+        const cx = 180, cy = 180, R = 150, r = 100;
+        let startAngle = -Math.PI / 2;
+        segments.forEach(seg => {
+            if (seg.value === 0) return;
+            const sliceAngle = (seg.value / total) * 2 * Math.PI;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R, startAngle, startAngle + sliceAngle);
+            ctx.arc(cx, cy, r, startAngle + sliceAngle, startAngle, true);
+            ctx.closePath();
+            ctx.fillStyle = seg.hex;
+            ctx.fill();
+            startAngle += sliceAngle;
+        });
+    })();
+
+    // ---- top issues bars ----
+    (function drawIssueBars() {
+        const issueLabels = {
+            'invalid_phone_format': 'Invalid phone format',
+            'missing_area_code': 'Missing area code',
+            'normalized_format': 'Phone normalized',
+            'phone_format_equivalent': 'Phone normalized',
+            'value_is_missing_or_blank': 'Missing or blank value',
+            'value_is_valid_and_unchanged': 'Valid (no change)',
+            'invalid_email_format': 'Invalid email format',
+            'suspicious_website_domain': 'Suspicious website',
+            'added_https_scheme': 'Website needs https://',
+            'website_format_equivalent': 'Website normalized',
+            'web_evidence_confirmed (web_scrape)': 'Confirmed (scrape)',
+            'web_evidence_confirmed (web_request)': 'Confirmed (request)',
+            'web_evidence_low_confidence (None)': 'Low confidence',
+            'web_evidence_low_confidence (web_request)': 'Low conf (request)',
+            'web_evidence_low_confidence (web_scrape)': 'Low conf (scrape)',
+        };
+        const entries = Object.entries(data.top_issues || {});
+        if (entries.length === 0) {
+            document.getElementById('issues-bars').innerHTML = '<li class="no-data">No issues recorded.</li>';
+            return;
+        }
+        const maxVal = Math.max(...entries.map(e => e[1]));
+        document.getElementById('issues-bars').innerHTML = entries.map(([key, val]) => {
+            const label = issueLabels[key] || key.replaceAll('_', ' ');
+            const pct = maxVal > 0 ? (val / maxVal * 100) : 0;
+            return `
+                <li class="hbar-item">
+                    <span class="hbar-label" title="${esc(label)}">${esc(label)}</span>
+                    <div class="hbar-bar" style="--fill:${pct}%;"></div>
+                    <span class="hbar-value">${val}</span>
+                </li>
+            `;
+        }).join('');
+    })();
+
+    // ---- data quality ----
+    (function drawQuality() {
+        const qualityDefs = [
+            { key: 'value_is_missing_or_blank',         label: 'Missing values',           highImpact: false },
+            { key: 'invalid_phone_format',              label: 'Invalid phone format',     highImpact: true  },
+            { key: 'missing_area_code',                 label: 'Missing area code',        highImpact: true  },
+            { key: 'invalid_email_format',              label: 'Invalid email format',     highImpact: false },
+            { key: 'suspicious_website_domain',         label: 'Suspicious website',       highImpact: true  },
+            { key: 'web_evidence_low_confidence (web_request)', label: 'Low-confidence website evidence', highImpact: true },
+            { key: 'web_evidence_low_confidence (web_scrape)',  label: 'Low-confidence scrape evidence',  highImpact: false },
+            { key: 'web_evidence_low_confidence (None)',        label: 'Low-confidence evidence',         highImpact: false }
+        ];
+        const issueCounts = data.top_issues || {};
+        const denom = totalSites || 0;
+        const missingValSiteLevel = data.missing_values_site_level || {};
+        const el = document.getElementById('quality-list');
+        let html = '';
+        qualityDefs.forEach(def => {
+            const count = issueCounts[def.key];
+            if (!count) return;
+            let pctText = '';
+            if (def.key === 'value_is_missing_or_blank' && missingValSiteLevel.count !== undefined) {
+                const sitePct = missingValSiteLevel.percent !== undefined ? missingValSiteLevel.percent : 0;
+                pctText = `<span class="pct">(${missingValSiteLevel.count} sites, ${sitePct}% of sites)</span>`;
+            } else {
+                const pct = denom > 0 ? ((count / denom) * 100).toFixed(0) : null;
+                pctText = pct !== null ? `<span class="pct">(${pct}% of sites)</span>` : '';
+            }
+            const c = def.highImpact ? 'quality-pill high-impact' : 'quality-pill';
+            html += `<span class="${c}"><span class="count">${count}</span> ${esc(def.label)} ${pctText}</span>`;
+        });
+        el.innerHTML = html || '<p class="quality-empty">✅ No data quality issues detected in this batch.</p>';
+        if (!html) document.getElementById('quality-section').style.display = 'none';
+    })();
+
+    // ---- top changes ----
+    (function drawTopChanges() {
+        const fieldPriority = { 'website':1, 'publicPhone':2, 'streetAddress':3, 'city':4, 'state':5, 'zip':6 };
+        const highImpactFields = new Set(['website','publicPhone']);
+
+        function sourceTagHtml(tag) {
+            if (!tag) return '';
+            const map = {
+                'platform_email':     { label: 'Platform', cls: 'source-tag-platform' },
+                'third_party_domain': { label: 'Directory', cls: 'source-tag-directory' },
+                'official_domain':    { label: 'Official',  cls: 'source-tag-official' },
+            };
+            const info = map[tag];
+            return info ? `<span class="source-tag ${info.cls}">${info.label}</span>` : '';
+        }
+
+        const sorted = [...changes].sort((a, b) => {
+            const ac = a.change_type === 'correction' && (a.confidence||0) >= 0.9 ? 1 : 0;
+            const bc = b.change_type === 'correction' && (b.confidence||0) >= 0.9 ? 1 : 0;
+            if (ac !== bc) return bc - ac;
+            const af = a.change_type === 'fill_gap' && (a.confidence||0) >= 0.7 ? 1 : 0;
+            const bf = b.change_type === 'fill_gap' && (b.confidence||0) >= 0.7 ? 1 : 0;
+            if (af !== bf) return bf - af;
+            const cd = (b.confidence||0) - (a.confidence||0);
+            if (cd !== 0) return cd;
+            return (fieldPriority[a.field_name]||99) - (fieldPriority[b.field_name]||99);
+        });
+
+        const top = sorted.slice(0, 5);
+        const el = document.getElementById('top-changes');
+        if (top.length === 0) {
+            el.innerHTML = '<p class="no-data">No high-priority changes detected.</p>';
+            return;
+        }
+        el.innerHTML = top.map(c => {
+            const isHigh = highImpactFields.has(c.field_name);
+            const orig = c.original_value == null || c.original_value === '' ? '(empty)' : esc(String(c.original_value));
+            const prop = c.proposed_value == null || c.proposed_value === '' ? '(empty)' : esc(String(c.proposed_value));
+            const typeText = c.change_type === 'correction' ? 'Data Correction'
+                           : c.change_type === 'fill_gap' ? 'Missing Value Found'
+                           : c.change_type === 'closure' ? '⚠ Permanently Closed' : '';
+            const conf = typeof c.confidence === 'number' ? c.confidence.toFixed(2) : c.confidence;
+            return `
+                <div class="top-change-item">
+                    <div class="top-change-details">
+                        <div class="top-change-site">${esc(c.site_name)}</div>
+                        <div class="top-change-field">Field: <strong>${esc(c.field_name)}</strong></div>
+                        ${typeText ? `<div class="top-change-type">${typeText}</div>` : ''}
+                        <div class="top-change-values">${orig}<span class="arrow">→</span><strong>${prop}</strong>${sourceTagHtml(c.source_tag)}</div>
+                        <div class="top-change-confidence">Confidence: ${conf}</div>
+                    </div>
+                    <span class="badge ${isHigh ? 'badge-high' : 'badge-moderate'}">${isHigh ? 'High Impact' : 'Moderate'}</span>
+                </div>
+            `;
+        }).join('');
+    })();
+
+    // ---- changes table ----
+    // Initialize review_outcome and review_timestamp on each change entry
+    // (passive data capture for future confidence calibration).
+    // Once enough reviewed data is collected (300–500+ records),
+    // confidence values can be adjusted based on actual acceptance rates.
+
+    // Restore review state from localStorage (survives page refreshes)
+    const storageKey = `review_state_${runId || 'default'}`;
+    try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            const savedState = JSON.parse(saved);
+            if (Array.isArray(savedState)) {
+                savedState.forEach(s => {
+                    const match = changes.find(c =>
+                        c.site_name === s.site_name && c.field_name === s.field_name
+                    );
+                    if (match) {
+                        match.review_outcome = s.review_outcome;
+                        match.review_timestamp = s.review_timestamp;
+                        match.corrected_value = s.corrected_value;
+                        match._saveState = s._saveState || 'pending';
+                    }
+                });
+            }
+        }
+    } catch (_) { /* localStorage unavailable */ }
+
+    // Also restore any manual entries from localStorage
+    // Only restore entries whose site_name appears in the current batch
+    // (prevents stale entries from prior batches bleeding through when
+    // the run_id happens to be reused or dashboard_summary.json is stale).
+    const manualKey = `manual_entries_${runId || 'default'}`;
+    const batchSiteNames = new Set(changes.map(c => c.site_name));
+    try {
+        const savedManual = localStorage.getItem(manualKey);
+        if (savedManual) {
+            const manualEntries = JSON.parse(savedManual);
+            if (Array.isArray(manualEntries)) {
+                let skipped = 0;
+                manualEntries.forEach(me => {
+                    // Skip entries for sites not in the current batch
+                    if (batchSiteNames.size > 0 && me.site_name && !batchSiteNames.has(me.site_name)) {
+                        skipped++;
+                        console.info(`[INFO] skipping stale manual entry: ${me.site_name} → ${me.field_name} (not in current batch)`);
+                        return;
+                    }
+                    const dup = changes.find(c =>
+                        c.site_name === me.site_name && c.field_name === me.field_name
+                        && (c.change_type === 'manual_entry' || c.change_type === 'closure' || c.change_type === 'removal')
+                    );
+                    if (!dup) changes.push(me);
+                });
+                if (skipped) console.info(`[INFO] ${skipped} stale manual entry/entries from prior batch skipped`);
+            }
+        }
+    } catch (_) { /* localStorage unavailable */ }
+
+    changes.forEach(c => {
+        if (c.review_outcome === undefined) c.review_outcome = null;
+        if (c.review_timestamp === undefined) c.review_timestamp = null;
+        if (c.corrected_value === undefined) c.corrected_value = null;
+        if (!c.run_id) c.run_id = runId;
+        // Save state tracking: 'none' | 'pending' | 'saved'
+        if (c._saveState === undefined) c._saveState = 'none';
+    });
+
+    // Persist review state to localStorage on any change
+    function persistReviewState() {
+        try {
+            const reviewable = changes
+                .filter(c => c.review_outcome != null || c.change_type === 'manual_entry')
+                .map(c => ({
+                    site_name: c.site_name,
+                    field_name: c.field_name,
+                    review_outcome: c.review_outcome,
+                    review_timestamp: c.review_timestamp,
+                    corrected_value: c.corrected_value,
+                    _saveState: c._saveState,
+                }));
+            localStorage.setItem(storageKey, JSON.stringify(reviewable));
+            // Also persist manual entries separately (they have full data)
+            const manuals = changes.filter(c => c.change_type === 'manual_entry');
+            localStorage.setItem(manualKey, JSON.stringify(manuals));
+        } catch (_) { /* localStorage full or unavailable */ }
+    }
+
+    // Warn on page unload if there are pending (unsaved) reviews
+    window.addEventListener('beforeunload', e => {
+        const hasPending = changes.some(c => c._saveState === 'pending');
+        if (hasPending) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    // ---- toast helper ----
+    const toastEl = document.createElement('div');
+    toastEl.className = 'toast';
+    document.body.appendChild(toastEl);
+    let toastTimer = null;
+    function showToast(msg, duration) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('visible');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('visible'), duration || 3000);
+    }
+
+    // ---- Top Missed Values renderer ----
+    // Merges persisted top_missed_values from dashboard_summary.json
+    // with in-memory review state (current session takes priority).
+    const persistedMissed = data.top_missed_values || [];
+
+    function renderMissedValues() {
+        const el = document.getElementById('missed-values-content');
+        // In-memory missed values from current session
+        const sessionMissed = changes
+            .filter(c => c.review_outcome === 'rejected' && c.corrected_value)
+            .map(c => ({
+                site_name: c.site_name,
+                field: c.field_name,
+                proposed_value: c.proposed_value,
+                corrected_value: c.corrected_value,
+                confidence: c.confidence,
+                review_timestamp: c.review_timestamp || '',
+            }));
+        // Merge: session entries first, then persisted (deduplicate by site+field)
+        const seen = new Set();
+        const merged = [];
+        for (const m of sessionMissed) {
+            const key = `${m.site_name}||${m.field}`;
+            if (!seen.has(key)) { seen.add(key); merged.push(m); }
+        }
+        for (const m of persistedMissed) {
+            const key = `${m.site_name}||${m.field}`;
+            if (!seen.has(key)) { seen.add(key); merged.push(m); }
+        }
+        if (merged.length === 0) {
+            el.innerHTML = '<p class="no-data">No reviewed misses captured yet.</p>';
+            return;
+        }
+        // Sort by most recent review_timestamp first, limit to 10
+        const sorted = merged.sort((a, b) => {
+            const ta = a.review_timestamp || '';
+            const tb = b.review_timestamp || '';
+            return tb.localeCompare(ta);
+        }).slice(0, 10);
+        el.innerHTML = `
+            <table class="missed-table">
+                <thead>
+                    <tr>
+                        <th>Site Name</th>
+                        <th>Field</th>
+                        <th>Proposed Value</th>
+                        <th>Corrected Value</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sorted.map(c => `
+                        <tr>
+                            <td>${esc(c.site_name || '')}</td>
+                            <td>${esc(c.field || c.field_name || '')}</td>
+                            <td>${esc(String(c.proposed_value ?? ''))}</td>
+                            <td><strong style="color:var(--accent-green)">${esc(c.corrected_value)}</strong></td>
+                            <td>${confBarHtml(c.confidence)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    // ---- populate manual-entry site dropdown from report ----
+    (function populateManualEntrySites() {
+        const sel = document.getElementById('me-site');
+        loadData('ai_validation_report')
+            .catch(() => null)
+            .then(report => {
+                if (!report || !report.sites) return;
+                const seen = new Set();
+                report.sites.forEach(s => {
+                    const name = s.name || '';
+                    if (!name || seen.has(name)) return;
+                    seen.add(name);
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name;
+                    if (s.id) opt.dataset.siteId = s.id;
+                    sel.appendChild(opt);
+                });
+                // Also add any sites from changes that might not be in the report
+                changes.forEach(c => {
+                    if (c.site_name && !seen.has(c.site_name)) {
+                        seen.add(c.site_name);
+                        const opt = document.createElement('option');
+                        opt.value = c.site_name;
+                        opt.textContent = c.site_name;
+                        sel.appendChild(opt);
+                    }
+                });
+            })
+            .catch(() => {
+                // Fallback: populate from changes array
+                const seen = new Set();
+                changes.forEach(c => {
+                    if (c.site_name && !seen.has(c.site_name)) {
+                        seen.add(c.site_name);
+                        const opt = document.createElement('option');
+                        opt.value = c.site_name;
+                        opt.textContent = c.site_name;
+                        sel.appendChild(opt);
+                    }
+                });
+            });
+    })();
+
+    // ---- manual entry modal logic ----
+    (function setupManualEntry() {
+        const modal = document.getElementById('manual-entry-modal');
+        const btn = document.getElementById('manual-entry-btn');
+        const cancelBtn = document.getElementById('me-cancel');
+        const submitBtn = document.getElementById('me-submit');
+        const siteEl = document.getElementById('me-site');
+        const fieldEl = document.getElementById('me-field');
+        const valueEl = document.getElementById('me-value');
+        const sourceEl = document.getElementById('me-source');
+        const blankEl = document.getElementById('me-blank');
+
+        function validateForm() {
+            const isBlank = blankEl.checked;
+            const isClosed = fieldEl.value === 'operational_status';
+            submitBtn.disabled = !(siteEl.value && fieldEl.value && (isBlank || isClosed || valueEl.value.trim()));
+        }
+        [siteEl, fieldEl, valueEl].forEach(el => el.addEventListener('input', validateForm));
+        siteEl.addEventListener('change', validateForm);
+        blankEl.addEventListener('change', () => {
+            if (blankEl.checked) {
+                valueEl.value = '';
+                valueEl.placeholder = '(will be set to blank)';
+                valueEl.disabled = true;
+                valueEl.style.opacity = '0.5';
+            } else {
+                valueEl.placeholder = 'Enter the correct value';
+                valueEl.disabled = false;
+                valueEl.style.opacity = '1';
+            }
+            validateForm();
+        });
+        fieldEl.addEventListener('change', () => {
+            if (fieldEl.value === 'operational_status') {
+                valueEl.value = 'Permanently Closed';
+                valueEl.readOnly = true;
+                valueEl.disabled = false;
+                valueEl.style.opacity = '0.7';
+                blankEl.checked = false;
+                blankEl.disabled = true;
+            } else {
+                if (valueEl.readOnly) { valueEl.value = ''; }
+                valueEl.readOnly = false;
+                blankEl.disabled = false;
+                if (!blankEl.checked) {
+                    valueEl.disabled = false;
+                    valueEl.style.opacity = '1';
+                }
+            }
+            validateForm();
+        });
+
+        btn.addEventListener('click', () => {
+            modal.classList.add('visible');
+            siteEl.focus();
+        });
+
+        function closeModal() {
+            modal.classList.remove('visible');
+            siteEl.value = '';
+            fieldEl.value = '';
+            valueEl.value = '';
+            valueEl.readOnly = false;
+            valueEl.disabled = false;
+            valueEl.style.opacity = '1';
+            valueEl.placeholder = 'Enter the correct value';
+            blankEl.checked = false;
+            blankEl.disabled = false;
+            sourceEl.value = '';
+            submitBtn.disabled = true;
+        }
+
+        cancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+        submitBtn.addEventListener('click', () => {
+            const siteName = siteEl.value;
+            const siteId = siteEl.selectedOptions[0]?.dataset?.siteId || null;
+            const field = fieldEl.value;
+            const isBlank = blankEl.checked;
+            const value = isBlank ? '' : valueEl.value.trim();
+            const source = sourceEl.value.trim() || null;
+
+            if (!siteName || !field || (!isBlank && !value && field !== 'operational_status')) return;
+
+            const isClosure = field === 'operational_status';
+            const entry = {
+                site_name: siteName,
+                site_id: siteId,
+                field_name: field,
+                original_value: isClosure ? 'Active' : null,
+                proposed_value: isBlank ? '' : value,
+                change_type: isClosure ? 'closure' : isBlank ? 'removal' : 'manual_entry',
+                confidence: null,
+                source_tag: source,
+                review_outcome: 'accepted',
+                review_timestamp: new Date().toISOString(),
+                corrected_value: null,
+                run_id: runId,
+                _saveState: 'pending',
+            };
+
+            changes.push(entry);
+            closeModal();
+
+            // Update counters & re-render
+            const sitesWithChanges = new Set(changes.map(c => c.site_name)).size;
+            const pctWithChanges = totalSites > 0 ? ((sitesWithChanges / totalSites) * 100).toFixed(1) : 0;
+            document.getElementById('total-changes').textContent = changes.length;
+            document.getElementById('records-with-changes').textContent = pctWithChanges;
+            updateFilterPills();
+            renderTable(activeFilter, document.getElementById('table-search').value);
+            updateReviewExportBtn();
+            showToast(`Manual entry added: ${siteName} → ${field}${isBlank ? ' (blanked)' : ''}`, 3500);
+            persistReviewState();
+            console.info(`[INFO] manual_entry - site=${siteName}, field=${field}, value=${value}, source=${source || 'none'}, run_id=${runId}`);
+        });
+    })();
+
+    const sitesWithChanges = new Set(changes.map(c => c.site_name)).size;
+    const pctWithChanges = totalSites > 0 ? ((sitesWithChanges / totalSites) * 100).toFixed(1) : 0;
+    document.getElementById('total-changes').textContent = changes.length;
+    document.getElementById('records-with-changes').textContent = pctWithChanges;
+
+    // Filter pills
+    const filtersEl = document.getElementById('change-filters');
+    let activeFilter = 'all';
+
+    function updateFilterPills() {
+        const typeCounts = { all: changes.length, fill_gap: 0, correction: 0, closure: 0, removal: 0, manual_entry: 0 };
+        changes.forEach(c => { if (typeCounts[c.change_type] !== undefined) typeCounts[c.change_type]++; });
+        filtersEl.innerHTML = `
+            <button class="filter-pill${activeFilter === 'all' ? ' active' : ''}" data-filter="all">All <span class="pill-count">${typeCounts.all}</span></button>
+            <button class="filter-pill${activeFilter === 'fill_gap' ? ' active' : ''}" data-filter="fill_gap">Fill Gap <span class="pill-count pc-green">${typeCounts.fill_gap}</span></button>
+            <button class="filter-pill${activeFilter === 'correction' ? ' active' : ''}" data-filter="correction">Correction <span class="pill-count pc-yellow">${typeCounts.correction}</span></button>
+            <button class="filter-pill${activeFilter === 'closure' ? ' active' : ''}" data-filter="closure">Closure <span class="pill-count" style="background:#fde8e8;color:#e74c3c">${typeCounts.closure}</span></button>
+            <button class="filter-pill${activeFilter === 'removal' ? ' active' : ''}" data-filter="removal">Removal <span class="pill-count" style="background:#fde8e8;color:#e67e22">${typeCounts.removal}</span></button>
+            <button class="filter-pill${activeFilter === 'manual_entry' ? ' active' : ''}" data-filter="manual_entry">Manual <span class="pill-count" style="background:var(--accent-purple-bg);color:var(--accent-purple)">${typeCounts.manual_entry}</span></button>
+        `;
+    }
+    updateFilterPills();
+
+    function sourceTagHtml(tag) {
+        if (!tag) return '';
+        const map = {
+            'platform_email':     { label: 'Platform', cls: 'source-tag-platform' },
+            'third_party_domain': { label: 'Directory', cls: 'source-tag-directory' },
+            'official_domain':    { label: 'Official',  cls: 'source-tag-official' },
+        };
+        const info = map[tag];
+        return info ? `<span class="source-tag ${info.cls}">${info.label}</span>` : '';
+    }
+
+    function confBarHtml(conf) {
+        const pct = Math.round((conf || 0) * 100);
+        const cls = pct >= 80 ? 'conf-high' : pct >= 50 ? 'conf-mid' : 'conf-low';
+        return `
+            <div class="conf-bar-wrap">
+                <div class="conf-bar"><div class="conf-bar-fill ${cls}" style="width:${pct}%;"></div></div>
+                <span>${typeof conf === 'number' ? conf.toFixed(2) : conf}</span>
+            </div>
+        `;
+    }
+
+    // ---- export review log (must be defined before renderTable calls updateReviewExportBtn) ----
+    const exportReviewBtn = document.getElementById('export-review-btn');
+
+    function updateReviewExportBtn() {
+        const hasReviews = changes.some(c => c.review_outcome != null);
+        exportReviewBtn.disabled = !hasReviews;
+    }
+
+    function renderTable(filter, search) {
+        const tbody = document.getElementById('changes-tbody');
+        let rows = changes;
+        if (filter && filter !== 'all') rows = rows.filter(c => c.change_type === filter);
+        if (search) {
+            const q = search.toLowerCase();
+            rows = rows.filter(c =>
+                (c.site_name||'').toLowerCase().includes(q) ||
+                (c.field_name||'').toLowerCase().includes(q) ||
+                String(c.original_value||'').toLowerCase().includes(q) ||
+                String(c.proposed_value||'').toLowerCase().includes(q)
+            );
+        }
+        if (rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No matching changes.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = rows.map((c, idx) => {
+            const badge = c.change_type === 'correction'
+                ? '<span class="badge badge-correction">Correction</span>'
+                : c.change_type === 'fill_gap'
+                ? '<span class="badge badge-fill-gap">Fill Gap</span>'
+                : c.change_type === 'closure'
+                ? '<span class="badge" style="background:#fde8e8;color:#e74c3c">⚠ Closure</span>'
+                : c.change_type === 'removal'
+                ? '<span class="badge" style="background:#fde8e8;color:#e67e22">✘ Removal</span>'
+                : c.change_type === 'manual_entry'
+                ? '<span class="badge badge-manual">Manual</span>' : '';
+            const globalIdx = changes.indexOf(c);
+            const acceptActive = c.review_outcome === 'accepted' ? ' active' : '';
+            const rejectActive = c.review_outcome === 'rejected' ? ' active' : '';
+            const correctedHtml = c.review_outcome === 'rejected'
+                ? `<div class="corrected-value-wrap">
+                       <label>Correct Value:</label><br>
+                       <input type="text" class="corrected-value-input" data-idx="${globalIdx}"
+                              placeholder="Enter correct value"
+                              value="${esc(c.corrected_value || '')}">
+                   </div>`
+                : '';
+            const saveStateHtml = c._saveState === 'saved'
+                ? '<div class="save-state save-done" title="Review decision saved">Saved</div>'
+                : c._saveState === 'pending'
+                ? '<div class="save-state save-pending" title="Changes not yet exported">Pending</div>'
+                : '';
+            return `
+                <tr>
+                    <td>${esc(c.site_name)}</td>
+                    <td>${esc(c.field_name)}</td>
+                    <td>${esc(String(c.original_value ?? ''))}</td>
+                    <td><strong>${c.change_type === 'removal' ? '<span style="color:#e67e22;font-style:italic">(blank — remove)</span>' : esc(String(c.proposed_value ?? ''))}</strong>${sourceTagHtml(c.source_tag)}</td>
+                    <td>${badge}</td>
+                    <td>${confBarHtml(c.confidence)}</td>
+                    <td>
+                        <div class="review-btn-group">
+                            <button class="review-btn rb-accept${acceptActive}" data-idx="${globalIdx}" data-action="accepted" title="Accept this change">&#10003;</button>
+                            <button class="review-btn rb-reject${rejectActive}" data-idx="${globalIdx}" data-action="rejected" title="Reject this change">&#10007;</button>${c.review_outcome === 'rejected' && c.corrected_value ? `<span class="corrected-indicator">&#9998;<span class="cv-tooltip">Corrected Value: ${esc(c.corrected_value)}</span></span>` : ''}
+                        </div>
+                        ${correctedHtml}
+                        ${saveStateHtml}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Attach input listeners for corrected_value fields after render
+        document.querySelectorAll('.corrected-value-input').forEach(input => {
+            input.addEventListener('input', e => {
+                const cidx = parseInt(e.target.dataset.idx, 10);
+                const ch = changes[cidx];
+                if (ch) {
+                    ch.corrected_value = e.target.value || null;
+                    // Editing corrected_value returns row to pending
+                    if (ch._saveState === 'saved') ch._saveState = 'pending';
+                    // Update the save-state pill inline without full re-render
+                    const row = e.target.closest('td');
+                    const pill = row && row.querySelector('.save-state');
+                    if (pill) { pill.className = 'save-state save-pending'; pill.textContent = 'Pending'; pill.title = 'Changes not yet exported'; }
+                }
+                // Update missed values as corrected_value changes
+                renderMissedValues();
+                persistReviewState();
+            });
+        });
+
+        updateReviewExportBtn();
+    }
+
+    renderTable(activeFilter, '');
+    renderMissedValues();
+
+    filtersEl.addEventListener('click', e => {
+        const pill = e.target.closest('.filter-pill');
+        if (!pill) return;
+        activeFilter = pill.dataset.filter || 'all';
+        updateFilterPills();
+        renderTable(activeFilter, document.getElementById('table-search').value);
+    });
+
+    document.getElementById('table-search').addEventListener('input', e => {
+        renderTable(activeFilter, e.target.value);
+    });
+
+    // ---- review button handling ----
+    // review_outcome is data capture only — does NOT affect confidence,
+    // classifications, or dashboard KPIs.
+    document.getElementById('changes-tbody').addEventListener('click', e => {
+        const btn = e.target.closest('.review-btn');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx, 10);
+        const action = btn.dataset.action;
+        const change = changes[idx];
+        if (!change) return;
+
+        // Toggle: clicking the same button again clears the decision
+        if (change.review_outcome === action) {
+            change.review_outcome = null;
+            change.review_timestamp = null;
+            change.corrected_value = null;
+            change._saveState = 'none';
+        } else {
+            change.review_outcome = action;
+            change.review_timestamp = new Date().toISOString();
+            // Clear corrected_value when switching to accepted
+            if (action === 'accepted') {
+                change.corrected_value = null;
+            }
+            change._saveState = 'pending';
+        }
+
+        // Structured log of review action (metadata only, no scoring impact)
+        console.info(`[INFO] review_action - site=${change.site_name}, field=${change.field_name}, outcome=${change.review_outcome}, run_id=${change.run_id || runId}`);
+
+        // Log correction if corrected_value is present
+        if (change.corrected_value) {
+            console.info(`[INFO] review_correction - site=${change.site_name}, field=${change.field_name}, corrected_value=${change.corrected_value}, run_id=${change.run_id || runId}`);
+        }
+
+        // Re-render to reflect state
+        renderTable(activeFilter, document.getElementById('table-search').value);
+        renderMissedValues();
+        persistReviewState();
+    });
+
+    exportReviewBtn.addEventListener('click', () => {
+        const reviewed = changes
+            .filter(c => c.review_outcome != null)
+            .map(c => ({
+                site_name: c.site_name,
+                site_id: c.site_id || null,
+                field: c.field_name,
+                proposed_value: c.proposed_value,
+                confidence: c.confidence,
+                change_type: c.change_type || null,
+                source_notes: c.change_type === 'manual_entry' ? (c.source_tag || null) : undefined,
+                review_outcome: c.review_outcome,
+                corrected_value: c.corrected_value || null,
+                run_id: c.run_id || runId,
+                review_timestamp: c.review_timestamp || new Date().toISOString(),
+            }));
+        if (reviewed.length === 0) return;
+
+        const blob = new Blob(
+            [JSON.stringify(reviewed, null, 2)],
+            { type: 'application/json;charset=utf-8;' }
+        );
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'review_log.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        // Mark all exported rows as saved
+        changes.forEach(c => {
+            if (c.review_outcome != null) c._saveState = 'saved';
+        });
+        renderTable(activeFilter, document.getElementById('table-search').value);
+        showToast(`${reviewed.length} review decision${reviewed.length !== 1 ? 's' : ''} saved`, 3500);
+    });
+
+    updateReviewExportBtn();
+
+    // Column sorting
+    let sortCol = null, sortAsc = true;
+    document.querySelectorAll('#changes-table th[data-col]').forEach(th => {
+        if (th.dataset.col === 'review') return; // Review column is not sortable
+        th.addEventListener('click', () => {
+            const col = th.dataset.col;
+            if (sortCol === col) sortAsc = !sortAsc;
+            else { sortCol = col; sortAsc = true; }
+            document.querySelectorAll('#changes-table th').forEach(h => h.classList.remove('sorted'));
+            th.classList.add('sorted');
+            const arrow = th.querySelector('.sort-arrow');
+            if (arrow) arrow.textContent = sortAsc ? '▲' : '▼';
+            const getVal = c => {
+                switch(col) {
+                    case 'site': return c.site_name||'';
+                    case 'field': return c.field_name||'';
+                    case 'original': return String(c.original_value||'');
+                    case 'proposed': return String(c.proposed_value||'');
+                    case 'type': return c.change_type||'';
+                    case 'confidence': return c.confidence||0;
+                    default: return '';
+                }
+            };
+            changes.sort((a, b) => {
+                let va = getVal(a), vb = getVal(b);
+                if (typeof va === 'number') return sortAsc ? va - vb : vb - va;
+                return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+            });
+            renderTable(activeFilter, document.getElementById('table-search').value);
+        });
+    });
+
+    // ---- batch trend (daily aggregation) ----
+    (function drawTrend() {
+        const batches = data.recent_batches || [];
+        const el = document.getElementById('batch-trend');
+        if (batches.length === 0) {
+            el.innerHTML = '<p class="no-data">No batch history available.</p>';
+            return;
+        }
+        const maxSites = Math.max(...batches.map(b => b.site_count || 0), 1);
+        el.innerHTML = batches.map(b => {
+            const h = Math.max(((b.site_count || 0) / maxSites) * 120, 4);
+            const approved = (b.classification_counts || {}).candidate_approved || 0;
+            const total = b.site_count || 0;
+            const pct = total > 0 ? Math.round((approved / total) * 100) : 0;
+            const color = pct >= 80 ? 'var(--accent-green)' : pct >= 50 ? 'var(--accent-yellow)' : 'var(--accent-red)';
+            // Use the pre-aggregated date key
+            let dateStr = '—';
+            if (b.date) {
+                dateStr = new Date(b.date + 'T00:00:00Z').toLocaleDateString('en-US', {month:'short',day:'numeric'});
+            } else if (b.run_id) {
+                const m = b.run_id.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                if (m) dateStr = new Date(m[0] + 'T00:00:00Z').toLocaleDateString('en-US', {month:'short',day:'numeric'});
+            } else if (b.validated_at) {
+                dateStr = new Date(b.validated_at).toLocaleDateString('en-US', {month:'short',day:'numeric'});
+            }
+            const runs = b.batch_runs || 1;
+            const runsLabel = runs === 1 ? '1 batch' : runs + ' batches';
+            return `
+                <div class="trend-col">
+                    <span class="trend-count">${total}</span>
+                    <div class="trend-bar" style="height:${h}px;background:${color};" title="${runsLabel}"></div>
+                    <span class="trend-label">${dateStr}</span>
+                    <span class="trend-sub">${runsLabel}</span>
+                </div>
+            `;
+        }).join('');
+    })();
+
+    // ---- export CSV ----
+    const exportBtn = document.getElementById('export-btn');
+
+    function csvEscape(value) {
+        if (value === null || value === undefined) return '';
+        const s = String(value);
+        return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+
+    function downloadCsv(filename, rows) {
+        const csv = rows.map(r => r.map(csvEscape).join(',')).join('\r\n');
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    function buildCsvRows(report) {
+        const header = ['Batch ID','Site Name','Closure Alert','Classification','Field','Status','Original Value','Proposed Value','Change Type','Source Tag','Detected Value','Confidence','Evidence Source','Reason','Evidence URLs','Review Outcome','Corrected Value','Run ID','Review Timestamp'];
+        const reportBatchId = (report && report.batch_id) || '';
+        const rows = [header];
+        const sites = (report && report.sites) || [];
+        sites.forEach(site => {
+            const siteName = site.name || '';
+            const classification = site.classification || '';
+            const closureAlert = site.closure_detected ? 'POSSIBLE CLOSURE' : '';
+            const fields = site.fields || [];
+            if (fields.length === 0) {
+                rows.push([reportBatchId, siteName, closureAlert, classification, '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+                return;
+            }
+            fields.forEach(f => {
+                const detectedValue = f.detected_value == null ? '' : f.detected_value;
+                const reasons = Array.isArray(f.reasons) ? f.reasons.join('; ') : (f.reasons || '');
+                const evidenceUrls = Array.isArray(f.evidence_urls) ? f.evidence_urls.join('; ') : '';
+                const changeTypeMap = { 'fill_gap': 'Missing Value Found', 'correction': 'Data Correction' };
+                const changeType = changeTypeMap[f.change_type] || '';
+                const sourceTag = f.source_tag || '';
+                // Look up review_outcome from in-memory changes (if reviewer
+                // marked a decision during this dashboard session)
+                const changeMatch = changes.find(c =>
+                    c.site_name === siteName &&
+                    c.field_name === (f.field || '') &&
+                    String(c.proposed_value || '') === String(f.proposed_value || '')
+                );
+                const reviewOutcome = (changeMatch && changeMatch.review_outcome) || '';
+                const correctedValue = (changeMatch && changeMatch.review_outcome === 'rejected' && changeMatch.corrected_value) || '';
+                const reviewRunId = (changeMatch && changeMatch.run_id) || runId;
+                const reviewTimestamp = (changeMatch && changeMatch.review_timestamp) || '';
+                rows.push([
+                    reportBatchId, siteName, closureAlert, classification,
+                    f.field || '', f.status || '',
+                    f.original_value == null ? '' : f.original_value,
+                    f.proposed_value == null ? '' : f.proposed_value,
+                    changeType, sourceTag, detectedValue,
+                    typeof f.confidence === 'number' ? f.confidence.toFixed(3) : (f.confidence || ''),
+                    f.evidence_source_type || '', reasons, evidenceUrls,
+                    reviewOutcome, correctedValue, reviewRunId, reviewTimestamp
+                ]);
+            });
+        });
+        return rows;
+    }
+
+    exportBtn.disabled = false;
+    exportBtn.addEventListener('click', () => {
+        exportBtn.disabled = true;
+        const orig = exportBtn.textContent;
+        exportBtn.textContent = 'Preparing…';
+        loadData('ai_validation_report')
+            .then(report => {
+                const csvBatchId = (report && report.batch_id) ? `_${report.batch_id}` : '';
+                downloadCsv(`validation_results${csvBatchId}.csv`, buildCsvRows(report));
+            })
+            .catch(err => showToast('Export failed: ' + err.message, 5000))
+            .finally(() => { exportBtn.disabled = false; exportBtn.textContent = orig; });
+    });
+})
+.catch(err => {
+    console.error('Dashboard load error:', err);
+    const errP = document.createElement('p');
+    errP.style.cssText = 'color:var(--accent-red);padding:20px;';
+    errP.textContent = 'Dashboard failed to load: ' + err.message;
+    document.querySelector('.container').appendChild(errP);
+});
+</script>
+</body>
+</html>

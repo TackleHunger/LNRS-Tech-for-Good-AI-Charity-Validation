@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "generated_at": null,
+  "source": "example placeholder data — NOT real charity contact information",
+  "site_count": 2,
+  "sites": [
+    {
+      "id": "EXAMPLE001",
+      "organizationId": "EXAMPLEORG1",
+      "name": "Example Community Food Pantry",
+      "streetAddress": "123 Example Street",
+      "addressLine2": "",
+      "city": "Anytown",
+      "state": "ST",
+      "zip": "00000",
+      "country": "US",
+      "publicEmail": "info@example.org",
+      "publicPhone": "(555) 010-0000",
+      "contactEmail": "",
+      "contactName": "",
+      "contactPhone": "",
+      "website": "https://www.example.org/",
+      "socialMedia": ""
+    },
+    {
+      "id": "EXAMPLE002",
+      "organizationId": "EXAMPLEORG2",
+      "name": "Sample Mobile Meal Program",
+      "streetAddress": "456 Placeholder Ave",
+      "addressLine2": "Suite 100",
+      "city": "Sampleville",
+      "state": "ST",
+      "zip": "11111",
+      "country": "US",
+      "publicEmail": "contact@example.net",
+      "publicPhone": "(555) 010-1111",
+      "contactEmail": "",
+      "contactName": "",
+      "contactPhone": "",
+      "website": "https://sample.example.net/",
+      "socialMedia": "https://www.facebook.com/example"
+    }
+  ]
+}

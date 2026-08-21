@@ -1,0 +1,28 @@
+# ── Python ──────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+
+# ── Spreadsheets / exports ──────────────────────────────────────────
+*.xlsx
+
+# ── Charity contact data (keep real data OUT of the public repo) ────
+# Canonical, consolidated charity contact data. Reconstruct locally with
+# `python scripts/build_charity_data.py`. See charity-data.example_synthpii.json
+# for the schema. NEVER commit the real file.
+charity-data.json
+
+# Generated pipeline artifacts that contain real charity contact data.
+# These are produced at runtime (locally or in CI) and must not be
+# committed to the public repository.
+sites_batch.json
+web_evidence_report.json
+ai_validation_report.json
+latest_summary.json
+dashboard_summary.json
+batch_history.json
+coverage_ledger.json
+review_log.json
+writeback_preview.json
+writeback_log.json
+pii_scan_report.json

@@ -1,0 +1,60 @@
+name: Deploy Demo Dashboard
+
+# Publishes a LIVE DEMO of the dashboard to GitHub Pages using ONLY the
+# committed schema placeholders (*.example_synthpii.json). No real charity data is
+# ever fetched, generated, or deployed by this workflow — the site ships
+# exactly what is in the repo, so it is safe for a public repository.
+#
+# At runtime the dashboard's loadData() helper first tries the real
+# `<name>.json` (absent here) and transparently falls back to the committed
+# `<name>.example_synthpii.json`, rendering the "sample placeholder data" banner.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; newer runs cancel in-progress ones.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Assemble demo site (placeholders only)
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          # Dashboard entry point.
+          cp dashboard.html _site/index.html
+          # Ship ONLY the *.example_synthpii.json placeholders — never real data.
+          # (Real *.json files are git-ignored and absent in the repo anyway.)
+          cp ./*.example_synthpii.json _site/ 2>/dev/null || true
+          echo "Deploying the following files:"
+          ls -la _site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

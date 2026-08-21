@@ -1,0 +1,115 @@
+{
+  "batch_id": "EXAMPLE0000",
+  "pulled_at": "2026-01-01T00:00:00Z",
+  "pulled_by": "example",
+  "limit": 3,
+  "site_count": 3,
+  "validated_at": "2026-01-01T00:00:00Z",
+  "validated_by": "ai_validate_confidence_v2",
+  "mode": "no_web_search",
+  "notes": [
+    "Example placeholder report — NOT real charity contact information.",
+    "Copy charity-data.example_synthpii.json to charity-data.json and run the pipeline to generate real data."
+  ],
+  "summary": {
+    "classification_counts": {
+      "candidate_approved": 2,
+      "deferred_low_confidence": 1,
+      "needs_exception_review": 0
+    },
+    "field_status_counts": {
+      "name": { "confirmed": 3 },
+      "streetAddress": { "confirmed": 3 },
+      "city": { "confirmed": 3 },
+      "state": { "confirmed": 3 },
+      "zip": { "confirmed": 3 },
+      "publicPhone": { "confirmed": 2, "proposed_update": 1 },
+      "publicEmail": { "confirmed": 3 },
+      "website": { "confirmed": 3 }
+    }
+  },
+  "sites": [
+    {
+      "id": "EXAMPLE001",
+      "organizationId": "EXAMPLEORG1",
+      "name": "Example Community Food Pantry",
+      "classification": "candidate_approved",
+      "overall_confidence": 0.82,
+      "manual_lookup_query": "Example Community Food Pantry Anytown ST food pantry",
+      "fields": [
+        {
+          "field": "name",
+          "status": "confirmed",
+          "confidence": 0.98,
+          "original_value": "Example Community Food Pantry",
+          "proposed_value": null,
+          "detected_value": "Example Community Food Pantry",
+          "evidence_urls": [],
+          "reasons": ["value_is_valid_and_unchanged"],
+          "evidence_source_type": null,
+          "change_type": null,
+          "source_tag": null
+        },
+        {
+          "field": "publicPhone",
+          "status": "proposed_update",
+          "confidence": 0.82,
+          "original_value": null,
+          "proposed_value": "(555) 010-0000",
+          "detected_value": "(555) 010-0000",
+          "evidence_urls": ["https://www.example.org/contact"],
+          "reasons": ["value_is_missing_or_blank", "web_evidence_medium_confidence (web_scrape)"],
+          "evidence_source_type": "web_scrape",
+          "change_type": "fill_gap",
+          "source_tag": "official_domain"
+        }
+      ]
+    },
+    {
+      "id": "EXAMPLE002",
+      "organizationId": "EXAMPLEORG2",
+      "name": "Sample Mobile Meal Program",
+      "classification": "candidate_approved",
+      "overall_confidence": 0.79,
+      "manual_lookup_query": "Sample Mobile Meal Program Sampleville ST food pantry",
+      "fields": [
+        {
+          "field": "name",
+          "status": "confirmed",
+          "confidence": 0.97,
+          "original_value": "Sample Mobile Meal Program",
+          "proposed_value": null,
+          "detected_value": "Sample Mobile Meal Program",
+          "evidence_urls": [],
+          "reasons": ["value_is_valid_and_unchanged"],
+          "evidence_source_type": null,
+          "change_type": null,
+          "source_tag": null
+        }
+      ]
+    },
+    {
+      "id": "EXAMPLE003",
+      "organizationId": "EXAMPLEORG3",
+      "name": "Placeholder Neighborhood Kitchen",
+      "classification": "deferred_low_confidence",
+      "overall_confidence": 0.44,
+      "manual_lookup_query": "Placeholder Neighborhood Kitchen food pantry",
+      "fields": [
+        {
+          "field": "name",
+          "status": "confirmed",
+          "confidence": 0.9,
+          "original_value": "Placeholder Neighborhood Kitchen",
+          "proposed_value": null,
+          "detected_value": "Placeholder Neighborhood Kitchen",
+          "evidence_urls": [],
+          "reasons": ["value_is_valid_and_unchanged"],
+          "evidence_source_type": null,
+          "change_type": null,
+          "source_tag": null
+        }
+      ]
+    }
+  ]
+}
