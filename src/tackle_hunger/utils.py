@@ -16,8 +16,8 @@ def phone_digits(value: Any) -> Optional[str]:
     Return only the digits of a phone string for equivalence comparison.
 
     Examples:
-      "(404) 792-0303" -> "4047920303"
-      "404-792-0303"    -> "4047920303"
+      "(555) 010-0123" -> "5550100123"
+      "555-010-0123"    -> "5550100123"
       None / blank      -> None
     """
     if value is None:

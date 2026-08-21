@@ -2654,7 +2654,7 @@ def _discover_website_from_email(
     Derive a likely official website from the org's `publicEmail` domain.
 
     When an organization uses a custom-domain email like
-    `stcolumb@stcolumbs.org`, the email domain is almost always the org's
+    `contact@example.org`, the email domain is almost always the org's
     own website. This is a much stronger signal than name-token guessing,
     so we try it first.
 
@@ -3023,8 +3023,8 @@ def _discover_website(
 # ---------------------------------------------------------------------------
 
 # Match common North American formats:
-#   (706) 517-0091  |  706-517-0091  |  706.517.0091  |  +1 706 517 0091
-#   706 517 0091    |  7065170091
+#   (555) 010-0091  |  555-010-0091  |  555.010.0091  |  +1 555 010 0091
+#   555 010 0091    |  5550100091
 # Area code first digit must be 2-9 (NANP rule) to reduce false positives
 # from year ranges, SKUs, etc.
 _PHONE_RE = re.compile(
@@ -3124,9 +3124,9 @@ def _extract_email_candidates(
 
     Returns a list of dicts (one per distinct email address):
       {
-        "email":  "info@stcolumbs.org",
+        "email":  "info@example.org",
         "local_part": "info",
-        "domain": "stcolumbs.org",
+        "domain": "example.org",
         "occurrences": int,
         "in_mailto": bool,
         "in_visible_text": bool,
@@ -3551,7 +3551,7 @@ def _email_proposal_gate(
         }
 
     # Admin prefix + umbrella office page → hard reject
-    # (e.g., ceo@diocese.org scraped from the diocese HQ page)
+    # (e.g., ceo@example.org scraped from the diocese HQ page)
     if admin_prefix and _page_scope["scope"] == "umbrella_office":
         return {
             **base, "accept": False, "downgrade": False,
@@ -4675,8 +4675,8 @@ def _extract_phone_candidates(
 
     Returns a list of dicts (one per *distinct* digit sequence):
       {
-        "digits": "7065170091",      # normalized
-        "display": "(706) 517-0091",
+        "digits": "5550100091",      # normalized
+        "display": "(555) 010-0091",
         "occurrences": int,          # visible-text occurrences
         "in_visible_text": bool,     # found in stripped page text >= once
         "in_tel_href": bool,         # found in tel: href
@@ -5399,7 +5399,7 @@ def _website_evidence(site, site_label, ctx: Optional[BatchContext] = None,
     Discovery: when the site has NO website on record, we attempt three
     discovery strategies (in order, highest signal first):
       1. Email-domain discovery - if the org has a custom-domain email
-         like `info@stcolumbs.org`, probe https://stcolumbs.org/ and
+         like `info@example.org`, probe https://example.org/ and
          use it as the proposed website if it loads and matches.
       2. Name-token + web-search discovery - generate candidate domains
          from the organization name and (when `search_results` are
