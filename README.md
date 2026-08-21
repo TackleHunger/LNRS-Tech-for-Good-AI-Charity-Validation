@@ -143,6 +143,44 @@ needs to touch the committed history):
 > *the machine* (safe to share) and never *the fuel* (real charity data + secrets,
 > kept private). Any automation added here must preserve that separation.
 
+### Integration contract (wire it however you like)
+
+The deployment steps above are one concrete recipe (GitHub Actions). The code
+itself is **platform-neutral**: it talks to the outside world through a small,
+stable contract, so you can host and orchestrate it with whatever tooling you
+prefer (GitHub Actions, Azure DevOps, Airflow, a container job, a manual run —
+your choice). To go live you only need to satisfy three things:
+
+**1. Inputs — provide configuration via environment variables.** Nothing is
+hardcoded; inject these from any secret store (Actions secrets, Azure Key Vault,
+AWS/GCP Secrets Manager, a mounted `.env`, container env, etc.):
+
+| Variable | Required? | Purpose |
+|----------|-----------|---------|
+| `AI_SCRAPING_TOKEN` | Required (non-`dev`) | Auth token for the Tackle Hunger GraphQL API. |
+| `ENVIRONMENT` | Optional | `production` / `staging` / `dev` — selects the API endpoint. |
+| `SERPER_API_KEY` / `BING_SEARCH_API_KEY` | Optional | Higher-quality web-evidence enrichment. |
+| `CHARITY_DATA_PATH` | Optional | Read `charity-data.json` from a custom (e.g. mounted) location. |
+
+See [src/tackle_hunger/graphql_client.py](src/tackle_hunger/graphql_client.py)
+for the exact resolution logic and endpoint map.
+
+**2. Outputs — produce the JSON files the dashboard reads.** Run the pipeline
+(`pull_batch` → `web_evidence` → `ai_validate` → `aggregate_summary` →
+`build_charity_data`) on whatever schedule/trigger you want, and make its
+artifacts available next to `dashboard.html`. The dashboard's `loadData()`
+helper reads plain files (`dashboard_summary.json`, `charity-data.json`, …) and
+falls back to the committed `*.example_synthpii.json` placeholders when they are
+absent — so "going live" is simply making the real files present in the runtime
+environment.
+
+**3. The one invariant — never commit real data or secrets back into the repo.**
+Publish pipeline outputs as build artifacts or to a private data store; do not
+`git add` the real `*.json` files or tokens. This is the single rule that keeps
+the public repository safe. Everything between the inputs and outputs — secret
+storage, scheduling, hosting, whether to enable API write-back — is yours to
+design.
+
 ## Target Goals / Deliverables / Potential Projects
 
 - Common to each:
